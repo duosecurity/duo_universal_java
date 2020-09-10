@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+ 
+<!DOCTYPE suppressions PUBLIC
+     "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+     "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+ 
+<suppressions>
+  <!-- We need to allow the names to have underscores so the JWT will be in the same format as the spec -->
+  <suppress checks="MemberName"
+             files="src/main/java/com/duosecurity/model/*"/>
+  <suppress checks="AbbreviationAsWordInName"
+             files="src/main/java/com/duosecurity/Utils.java|src/main/java/com/duosecurity/Client.java"/>
+  <suppress checks="AbbreviationAsWordInName"
+             files="src/main/java/com/duosecurity/Utils.java|src/main/java/com/duosecurity/service/*"/>
+</suppressions>

@@ -1,0 +1,93 @@
+package com.duosecurity.service;
+
+import static com.duosecurity.Utils.getAndValidateUrl;
+
+import com.duosecurity.exception.DuoException;
+import com.duosecurity.model.HealthCheckResponse;
+import com.duosecurity.model.TokenResponse;
+import java.io.IOException;
+import okhttp3.CertificatePinner;
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
+public class DuoConnector {
+
+  protected Retrofit retrofit;
+
+  /**
+   * DuoConnector Constructor.
+   *
+   * @param apiHost     This value is the api host provided by Duo in the admin panel.
+   * @param caCerts     CA Certificates used to connect to Duo
+   */
+  public DuoConnector(String apiHost, String[] caCerts) throws DuoException {
+    CertificatePinner duoCertificatePinner = new CertificatePinner.Builder()
+        .add(apiHost, caCerts)
+        .build();
+
+    OkHttpClient client = new OkHttpClient.Builder().certificatePinner(
+                            duoCertificatePinner).build();
+
+    retrofit = new Retrofit.Builder()
+            .baseUrl(getAndValidateUrl(apiHost, "").toString())
+            .addConverterFactory(JacksonConverterFactory.create())
+            .client(client)
+            .build();
+  }
+
+  /**
+   * Send Health Check request.
+   *
+   * @param clientId                The client id provided by Duo in the admin panel
+   * @param clientAssertion         A JWT the Duo Health Check endpoint needs
+   *
+   * @return HealthCheckResponse    Returns result from the Health Check
+   *
+   * @throws DuoException           For issues sending or recieving the request
+   */
+  public HealthCheckResponse duoHealthcheck(String clientId, String clientAssertion)
+      throws DuoException {
+    DuoService service = retrofit.create(DuoService.class);
+    Call<HealthCheckResponse> callSync = service.duoHealthCheck(clientId, clientAssertion);
+    try {
+      Response<HealthCheckResponse> response = callSync.execute();
+      return response.body();
+    } catch (IOException e) {
+      throw new DuoException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Send request to exchange code for an encoded JWT.
+   *
+   * @param userAgent           A user agent string
+   * @param grantType           A string that tells what type of exchange that will occur
+   * @param code                An authentication session transaction id
+   * @param redirectUri         The URL to redirect back to after a successful auth
+   * @param clientAssertionType The type of client assertion used
+   * @param clientAssertion     JWT that holds information to verify that the owner of the code
+   *                            is authorized to have it
+   *
+   * @return TokenResponse  Returns result from the Health Check
+   *
+   * @throws DuoException   For issues sending or recieving the request
+   */
+  public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
+                                                             String code, String redirectUri,
+                                                             String clientAssertionType,
+                                                             String clientAssertion)
+      throws DuoException {
+    DuoService service = retrofit.create(DuoService.class);
+    Call<TokenResponse> callSync = service.exchangeAuthorizationCodeFor2FAResult(userAgent,
+                                grantType, code, redirectUri, clientAssertionType, clientAssertion);
+    try {
+      Response<TokenResponse> response = callSync.execute();
+      return response.body();
+    } catch (IOException e) {
+      throw new DuoException(e.getMessage(), e);
+    }
+  }
+}
