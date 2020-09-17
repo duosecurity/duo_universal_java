@@ -104,13 +104,13 @@ public class LoginController {
   /**
    * GET handler for duo-callback page.
    *
-   * @param code    An authentication session transaction id
+   * @param duoCode    An authentication session transaction id
    * @param state   A random string returned from Duo used to maintain state
    *
    * @return ModelAndView   A model that contains information about where to redirect next
    */
   @RequestMapping(value = "/duo-callback", method = RequestMethod.GET)
-  public ModelAndView duoCallback(@RequestParam("code") String code,
+  public ModelAndView duoCallback(@RequestParam("duo_code") String duoCode,
                                   @RequestParam("state") String state) throws DuoException {
     // Step 5: Validate state returned from Duo is the same as the one saved previously.
     // If it isn't return an error
@@ -122,8 +122,8 @@ public class LoginController {
     // Remove state from the list of valid sessions
     String username = stateMap.remove(state);
 
-    // Step 6: Exchange the auth code for a Token object
-    Token token = duoClient.exchangeAuthorizationCodeFor2FAResult(code, username);
+    // Step 6: Exchange the auth duoCode for a Token object
+    Token token = duoClient.exchangeAuthorizationCodeFor2FAResult(duoCode, username);
 
     // If the auth was successful, render the welcome page otherwise return an error
     if (authWasSuccessful(token)) {

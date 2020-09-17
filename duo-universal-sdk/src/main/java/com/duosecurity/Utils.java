@@ -65,6 +65,7 @@ public class Utils {
                   .withClaim("state", state)
                   .withClaim("duo_uname", username)
                   .withClaim("response_type", "code")
+                  .withClaim("use_duo_code_attribute", "True")
                   .sign(Algorithm.HMAC512(clientSecret));
     } catch (UnsupportedEncodingException e) {
       throw new DuoException(e.getMessage(), e);

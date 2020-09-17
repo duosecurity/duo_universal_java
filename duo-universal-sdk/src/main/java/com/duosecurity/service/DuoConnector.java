@@ -61,14 +61,14 @@ public class DuoConnector {
   }
 
   /**
-   * Send request to exchange code for an encoded JWT.
+   * Send request to exchange duoCode for an encoded JWT.
    *
    * @param userAgent           A user agent string
    * @param grantType           A string that tells what type of exchange that will occur
-   * @param code                An authentication session transaction id
+   * @param duoCode             An authentication session transaction id
    * @param redirectUri         The URL to redirect back to after a successful auth
    * @param clientAssertionType The type of client assertion used
-   * @param clientAssertion     JWT that holds information to verify that the owner of the code
+   * @param clientAssertion     JWT that holds information to verify that the owner of the duoCode
    *                            is authorized to have it
    *
    * @return TokenResponse  Returns result from the Health Check
@@ -76,13 +76,13 @@ public class DuoConnector {
    * @throws DuoException   For issues sending or recieving the request
    */
   public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
-                                                             String code, String redirectUri,
+                                                             String duoCode, String redirectUri,
                                                              String clientAssertionType,
                                                              String clientAssertion)
       throws DuoException {
     DuoService service = retrofit.create(DuoService.class);
     Call<TokenResponse> callSync = service.exchangeAuthorizationCodeFor2FAResult(userAgent,
-                                grantType, code, redirectUri, clientAssertionType, clientAssertion);
+                            grantType, duoCode, redirectUri, clientAssertionType, clientAssertion);
     try {
       Response<TokenResponse> response = callSync.execute();
       return response.body();

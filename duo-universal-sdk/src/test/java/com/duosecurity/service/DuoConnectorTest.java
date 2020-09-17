@@ -72,11 +72,11 @@ class DuoConnectorTest {
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setId_token("token");
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
-        when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "code", "redirect_uri",
+        when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
                 "client_assertion_type", "client_assertion")).thenReturn(callSync);
         when(callSync.execute()).thenReturn(Response.success(tokenResponse));
 
-        TokenResponse result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "code", "redirect_uri",
+        TokenResponse result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
                 "client_assertion_type", "client_assertion");
         assertEquals("token", result.getId_token());
     }
@@ -91,13 +91,13 @@ class DuoConnectorTest {
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setId_token("token");
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
-        when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "code", "redirect_uri",
+        when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
                 "client_assertion_type", "client_assertion")).thenReturn(callSync);
         when(callSync.execute()).thenThrow(new IOException("Timeout"));
 
         TokenResponse result = null;
         try {
-            result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "code", "redirect_uri",
+            result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
                     "client_assertion_type", "client_assertion");
             Assertions.fail();
         } catch (DuoException e) {

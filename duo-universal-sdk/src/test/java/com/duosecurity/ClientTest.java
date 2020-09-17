@@ -169,7 +169,7 @@ class ClientTest {
             }
         };
 
-        Token result = client.exchangeAuthorizationCodeFor2FAResult("code", stubValidator);
+        Token result = client.exchangeAuthorizationCodeFor2FAResult("duo_code", stubValidator);
         assertEquals(result.getSub(), "1234567890");
     }
 
@@ -177,7 +177,7 @@ class ClientTest {
     void exchangeAuthorizationCodeFor2FAResult_throws_exception_for_invalid_api_host() throws DuoException {
         try {
             Client badClient = new Client(CLIENT_ID, CLIENT_SECRET, "", HTTPS_REDIRECT_URI);
-            badClient.exchangeAuthorizationCodeFor2FAResult("code", "username");
+            badClient.exchangeAuthorizationCodeFor2FAResult("duo_code", "username");
             Assertions.fail();
         } catch (DuoException e) {
             assertTrue(e.getMessage().contains("Invalid host"));

@@ -19,7 +19,7 @@ interface DuoService {
   @POST("/oauth/v1/token")
   Call<TokenResponse> exchangeAuthorizationCodeFor2FAResult(@Header("user-agent") String userAgent,
                                     @Field("grant_type") String grantType,
-                                    @Field("code") String code,
+                                    @Field("code") String duoCode,
                                     @Field("redirect_uri") String redirectUri,
                                     @Field("client_assertion_type") String clientAssertionType,
                                     @Field("client_assertion") String clientAssertion);

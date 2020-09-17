@@ -130,7 +130,6 @@ public class Client {
   }
 
 
-  //TODO: Validate code once it is no longer a UUID. https://phab.duosec.org/T78302
   /**
    * Constructs a string which can be used to redirect the client browser to Duo for 2FA.
    *
@@ -153,12 +152,12 @@ public class Client {
 
 
   /**
-   * Verifies the code returned by Duo and exchanges it for a {@link Token} which contains
+   * Verifies the duoCode returned by Duo and exchanges it for a {@link Token} which contains
    * information pertaining to the auth.  Uses the default token validator defined in
    * DuoIdTokenValidator.
    * To use a custom validator, see exchangeAuthorizationCodeFor2FAResult(String, TokenValidator)
    *
-   * @param code This string is an identifier for the auth and should be exchanged with Duo for a
+   * @param duoCode This string is an identifier for the auth and should be exchanged with Duo for a
    *             token to determine if the auth was successful as well as obtain meta-data about
    *             about the auth.
    *
@@ -166,14 +165,14 @@ public class Client {
    *
    * @return {@link Token}
    */
-  public Token exchangeAuthorizationCodeFor2FAResult(String code, String username)
+  public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, String username)
       throws DuoException {
     TokenValidator validator = new DuoIdTokenValidator(clientSecret, username, clientId, apiHost);
-    return exchangeAuthorizationCodeFor2FAResult(code, validator);
+    return exchangeAuthorizationCodeFor2FAResult(duoCode, validator);
   }
 
   /**
-   * Verifies the code returned by Duo and exchanges it for a {@link Token} which contains
+   * Verifies the duoCode returned by Duo and exchanges it for a {@link Token} which contains
    * information pertaining to the auth.  This version of the method allows the use of a
    * custom JWT token validator.
    * If you use a custom validator:
@@ -185,9 +184,9 @@ public class Client {
    *     Issued at / Expiration
    *     Username (preferred_username)
    *
-   * @param code This string is an identifier for the auth and should be exchanged with Duo for a
-   *             token to determine if the auth was successful as well as obtain meta-data about
-   *             the auth.
+   * @param duoCode This string is an identifier for the auth and should be exchanged with Duo for a
+   *                token to determine if the auth was successful as well as obtain meta-data about
+   *                the auth.
    *
    * @param validator A TokenValidator that will validate and decode the JWT ID Token provided
    *                  by Duo.
@@ -195,11 +194,11 @@ public class Client {
    * @return {@link Token}
    *
    */
-  public Token exchangeAuthorizationCodeFor2FAResult(String code, TokenValidator validator)
+  public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, TokenValidator validator)
       throws DuoException {
     String aud = getAndValidateUrl(apiHost, OAUTH_V_1_TOKEN_ENDPOINT).toString();
     TokenResponse response = duoConnector.exchangeAuthorizationCodeFor2FAResult(userAgent,
-            "authorization_code", code, redirectUri, CLIENT_ASSERTION_TYPE,
+            "authorization_code", duoCode, redirectUri, CLIENT_ASSERTION_TYPE,
             createJwt(clientId, clientSecret, aud));
     String idToken = response.getId_token();
     DecodedJWT decodedJwt = validator.validateAndDecode(idToken);
