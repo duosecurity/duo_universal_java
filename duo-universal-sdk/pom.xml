@@ -5,12 +5,12 @@
     <parent>
         <artifactId>duo-universal-java</artifactId>
         <groupId>com.duosecurity</groupId>
-        <version>1.0.0</version>
+        <version>1.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>duo-universal-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 
     <dependencies>
         <dependency>
