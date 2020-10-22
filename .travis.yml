@@ -1,0 +1,18 @@
+language: java
+dist: trusty
+jdk:
+    - oraclejdk8
+    - openjdk8
+install:
+    - >
+        mvn install
+        --define "skipTests=true"
+        --define "maven.javadoc.skip=true"
+        --batch-mode
+        --show-version
+script:
+    - >
+        mvn test
+        --batch-mode
+    - >
+        mvn checkstyle:check
