@@ -2,7 +2,7 @@
 
 This library allows a web developer to quickly add Duo's interactive, self-service, two-factor authentication to any Java web login form.
 
-See our developer documentation at http://www.duosecurity.com/docs/duoweb for guidance on integrating Duo 2FA into your web application.
+See our developer documentation at http://www.duosecurity.com/docs/duoweb-v4 for guidance on integrating Duo 2FA into your web application.
 
 What's here:
 * `duo-universal-sdk` - The Duo SDK for interacting with the Duo Universal Prompt
