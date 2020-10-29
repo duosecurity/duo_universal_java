@@ -93,6 +93,8 @@ public class Client {
    * @param apiHost This value is the api host provided by Duo in the admin panel.
    * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
    * @param userCaCerts This value is a list of CA Certificates used to validate connections to Duo.
+   *
+   * @throws DuoException For problems validating the client parameters
    */
   public Client(String clientId, String clientSecret, String apiHost,
                 String redirectUri, String[] userCaCerts) throws DuoException {
@@ -118,6 +120,8 @@ public class Client {
    * Checks if Duo is healthy and available for 2FA.
    *
    * @return {@link HealthCheckResponse}
+   *
+   * @throws DuoException For health check errors
    */
   public HealthCheckResponse healthCheck() throws DuoException {
     String aud = getAndValidateUrl(apiHost, OAUTH_V_1_HEALTH_CHECK_ENDPOINT).toString();
@@ -139,6 +143,8 @@ public class Client {
    *              and should be validated. {@link #generateState} exists as a utility function to
    *              generate this param.
    * @return String
+   *
+   * @throws DuoException For problems creating the auth url
    */
   public String createAuthUrl(String username, String state) throws DuoException {
     validateUsername(username);
@@ -164,6 +170,8 @@ public class Client {
    * @param username The user to be authenticated by Duo
    *
    * @return {@link Token}
+   *
+   * @throws DuoException For errors exchanging duoCode for 2FA results
    */
   public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, String username)
       throws DuoException {
@@ -192,6 +200,8 @@ public class Client {
    *                  by Duo.
    *
    * @return {@link Token}
+   *
+   * @throws DuoException For errors exchanging duoCode for 2FA results
    *
    */
   public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, TokenValidator validator)

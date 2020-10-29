@@ -11,6 +11,28 @@
 
     <artifactId>duo-example</artifactId>
     <version>1.0.2</version>
+    <name>Duo Universal Java</name>
+    <url>https://github.com/duosecurity/duo_universal_java/</url>
+    <description>Duo Web SDK for two-factor authentication</description>
+    <developers>
+        <developer>
+            <name>Duo Security</name>
+            <email>support@duosecurity.com</email>
+            <organization>Duo Security Inc.</organization>
+            <organizationUrl>https://duo.com/docs/duoweb-v4</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>BSD</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/duosecurity/duo_universal_java.git</connection>
+        <developerConnection>scm:git:ssh://github.com:duosecurity/duo_universal_java.git</developerConnection>
+        <url>http://github.com/duosecurity/duo_universal_java/tree/main</url>
+    </scm>
 
     <dependencies>
         <dependency>

@@ -20,8 +20,10 @@ public class DuoConnector {
   /**
    * DuoConnector Constructor.
    *
-   * @param apiHost     This value is the api host provided by Duo in the admin panel.
-   * @param caCerts     CA Certificates used to connect to Duo
+   * @param apiHost         This value is the api host provided by Duo in the admin panel.
+   * @param caCerts         CA Certificates used to connect to Duo
+   *
+   * @throws DuoException   For issues getting and validating the URL
    */
   public DuoConnector(String apiHost, String[] caCerts) throws DuoException {
     CertificatePinner duoCertificatePinner = new CertificatePinner.Builder()

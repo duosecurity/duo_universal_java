@@ -11,6 +11,93 @@
 
     <artifactId>duo-universal-sdk</artifactId>
     <version>1.0.2</version>
+    <name>Duo Universal Java</name>
+    <url>https://github.com/duosecurity/duo_universal_java/</url>
+    <description>Duo Web SDK for two-factor authentication</description>
+    <developers>
+        <developer>
+            <name>Duo Security</name>
+            <email>support@duosecurity.com</email>
+            <organization>Duo Security Inc.</organization>
+            <organizationUrl>https://duo.com/docs/duoweb-v4</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>BSD</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/duosecurity/duo_universal_java.git</connection>
+        <developerConnection>scm:git:ssh://github.com:duosecurity/duo_universal_java.git</developerConnection>
+        <url>http://github.com/duosecurity/duo_universal_java/tree/main</url>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- This is used to release our package to OSSHR and Maven -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.8</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                           <serverId>ossrh</serverId>
+                           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                           <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <!-- This plugin is used to sign our package with our GPG keys -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- This plugin is used to configure source Maven plugins -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- This plugin is used to configure javadocs -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                              <id>attach-javadocs</id>
+                              <goals>
+                                  <goal>jar</goal>
+                              </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
