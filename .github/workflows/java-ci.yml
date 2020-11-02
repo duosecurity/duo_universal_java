@@ -1,0 +1,16 @@
+name: Build and Test with Maven
+on: [push, pull_request]
+
+jobs:
+   build-and-test:
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v2
+       - name: Set up Java
+         uses: actions/setup-java@v1
+         with:
+           java-version: 1.8
+       - name: Build and test with Maven
+         run: mvn -B package
+       - name: Lint with checkstyle
+         run: mvn checkstyle:check
