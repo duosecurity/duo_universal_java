@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.duosecurity.exception.DuoException;
 import java.io.UnsupportedEncodingException;
-import java.lang.Math;
 
 /**
  * A JWT ID Token Validator that enforces Duo's claim requirements.
