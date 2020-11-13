@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.*;
-import org.apache.commons.codec.binary.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;

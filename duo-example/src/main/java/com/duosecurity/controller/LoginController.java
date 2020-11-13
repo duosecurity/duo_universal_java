@@ -3,7 +3,6 @@ package com.duosecurity.controller;
 
 import com.duosecurity.Client;
 import com.duosecurity.exception.DuoException;
-import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.Token;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

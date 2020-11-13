@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.*;

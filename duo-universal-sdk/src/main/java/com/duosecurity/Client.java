@@ -2,7 +2,6 @@ package com.duosecurity;
 
 import static com.duosecurity.Utils.createJwt;
 import static com.duosecurity.Utils.createJwtForAuthUrl;
-import static com.duosecurity.Utils.generateJwtId;
 import static com.duosecurity.Utils.getAndValidateUrl;
 import static com.duosecurity.Utils.transformDecodedJwtToToken;
 import static com.duosecurity.Utils.validateCaCert;
@@ -11,7 +10,6 @@ import static com.duosecurity.Validator.validateState;
 import static com.duosecurity.Validator.validateUsername;
 import static java.lang.String.format;
 
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.duosecurity.DuoIdTokenValidator;
 import com.duosecurity.TokenValidator;
