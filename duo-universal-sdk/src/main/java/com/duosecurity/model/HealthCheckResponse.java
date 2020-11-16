@@ -2,8 +2,8 @@ package com.duosecurity.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import lombok.Data;
 import java.io.Serializable;
+import lombok.Data;
 
 @Data
 public class HealthCheckResponse implements Serializable {
