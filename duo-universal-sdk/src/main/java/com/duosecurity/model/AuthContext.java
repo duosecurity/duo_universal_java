@@ -1,9 +1,12 @@
 package com.duosecurity.model;
 
+import java.io.Serializable;
 import lombok.Data;
 
 @Data
-public class AuthContext {
+public class AuthContext implements Serializable {
+  private static final long serialVersionUID = -2431823399834806194L;
+
   private String result;
   private Integer timestamp;
   private AuthDevice auth_device;

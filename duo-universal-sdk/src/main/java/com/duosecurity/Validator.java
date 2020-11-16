@@ -23,7 +23,7 @@ class Validator {
       throw new DuoException("Invalid client secret");
     }
     try {
-      URL url =  new URL(redirectUri);
+      new URL(redirectUri);
     } catch (MalformedURLException e) {
       throw new DuoException(e.getMessage(), e);
     }

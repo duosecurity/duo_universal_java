@@ -11,8 +11,6 @@ import static com.duosecurity.Validator.validateUsername;
 import static java.lang.String.format;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.duosecurity.DuoIdTokenValidator;
-import com.duosecurity.TokenValidator;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.Token;
@@ -125,7 +123,7 @@ public class Client {
     String aud = getAndValidateUrl(apiHost, OAUTH_V_1_HEALTH_CHECK_ENDPOINT).toString();
     HealthCheckResponse response = duoConnector.duoHealthcheck(clientId,
                 createJwt(clientId, clientSecret, aud));
-    if (!"OK".equalsIgnoreCase(response.getStat())) {
+    if (!response.wasSuccess()) {
       throw new DuoException(response.getMessage());
     }
     return response;
