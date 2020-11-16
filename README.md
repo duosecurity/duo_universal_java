@@ -20,6 +20,9 @@ This library requires Java 8 and uses Maven to build the JAR files.
 
 Run `mvn package` to generate a JAR with dependencies, suitable for inclusion in a web application.
 
+This SDK sets the `use_duo_code_attribute` attribute to `true`, which forces the the authorization code will 
+be returned under the attribute name of `duo_code`. See [this link](https://duo.com/docs/oauthapi) for more info.
+
 # Demo
 
 ## Build

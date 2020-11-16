@@ -132,7 +132,7 @@ public class Utils {
     while (sb.length() < length) {
       sb.append(Integer.toHexString(secureRandom.nextInt()));
     }
-    return sb.toString().substring(0, length);
+    return sb.substring(0, length);
   }
 
   private static AuthContext getAuthContext(Map<String, Object> authContextMap) {
