@@ -16,7 +16,7 @@ What's here:
 * `duo-example` - An example web application with Duo integrated
 
 # Usage
-This library requires Java 8 and uses Maven to build the JAR files.
+This library requires Java 8 or later (tested through Java 16) and uses Maven to build the JAR files.
 
 Run `mvn package` to generate a JAR with dependencies, suitable for inclusion in a web application.
 
