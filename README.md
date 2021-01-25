@@ -20,6 +20,17 @@ This library requires Java 8 or later (tested through Java 16) and uses Maven to
 
 Run `mvn package` to generate a JAR with dependencies, suitable for inclusion in a web application.
 
+The Duo Universal Client for Java is available from Duo Security on Maven.  Include the following in your dependency definitions:
+```
+<!-- https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk -->
+<dependency>
+    <groupId>com.duosecurity</groupId>
+    <artifactId>duo-universal-sdk</artifactId>
+    <version>1.0.3</version>
+</dependency>
+```
+See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.0.3 for more details.
+
 This SDK sets the `use_duo_code_attribute` attribute to `true`, which forces the the authorization code will
 be returned under the attribute name of `duo_code`. See [this link](https://duo.com/docs/oauthapi) for more info.
 
