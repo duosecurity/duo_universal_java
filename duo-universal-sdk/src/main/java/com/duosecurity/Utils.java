@@ -48,7 +48,8 @@ public class Utils {
   }
 
   static String createJwtForAuthUrl(String clientId, String clientSecret, String redirectUri,
-                                    String state, String username) throws DuoException {
+                                    String state, String username,
+                                    Boolean useDuoCodeAttribute) throws DuoException {
     Date expiration = new Date();
     expiration.setTime(expiration.getTime() + ONE_HOUR_IN_MILLISECONDS);
     try {
@@ -61,7 +62,7 @@ public class Utils {
                   .withClaim("state", state)
                   .withClaim("duo_uname", username)
                   .withClaim("response_type", "code")
-                  .withClaim("use_duo_code_attribute", "True")
+                  .withClaim("use_duo_code_attribute", useDuoCodeAttribute)
                   .sign(Algorithm.HMAC512(clientSecret));
     } catch (UnsupportedEncodingException e) {
       throw new DuoException(e.getMessage(), e);

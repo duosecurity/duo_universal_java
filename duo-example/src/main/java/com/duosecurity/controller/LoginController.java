@@ -39,11 +39,23 @@ public class LoginController {
 
   private Client duoClient;
 
-  // Step 1: Construct the duoClient object upon class creation
+  /**
+   * Create and initialize the Duo Client.
+   *
+   * @throws DuoException For problems creating the Clients
+   */
   @PostConstruct
   public void initializeDuoClient() throws DuoException {
     stateMap = new HashMap<>();
-    duoClient = new Client(clientId, clientSecret, apiHost, redirectUri);
+    duoClient = new Client.Builder(clientId, clientSecret, apiHost, redirectUri).build();
+
+    /* Example of setting optional fields
+    duoClient = new Client.Builder(clientId, clientSecret, apiHost, redirectUri)
+            .setUseDuoCodeAttribute(false)
+            .setCACerts(customCerts)
+            .appendUserAgentInfo("custom string")
+            .build();
+    */
   }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)

@@ -60,7 +60,7 @@ class UtilsTest {
 
     @Test
     void createJWTForAuthURL() throws DuoException {
-        String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username");
+        String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username", true);
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT = JWT.decode(jwt);
         assertEquals(decodedJWT.getClaim("client_id").asString(), "my_client_id");

@@ -31,9 +31,6 @@ The Duo Universal Client for Java is available from Duo Security on Maven.  Incl
 ```
 See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.0.3 for more details.
 
-This SDK sets the `use_duo_code_attribute` attribute to `true`, which forces the the authorization code will
-be returned under the attribute name of `duo_code`. See [this link](https://duo.com/docs/oauthapi) for more info.
-
 # Demo
 
 ## Build
