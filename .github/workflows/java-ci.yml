@@ -14,7 +14,7 @@ jobs:
          working-directory: duo-example
          run: printf "duo.clientId=DIAAAAAAAAAAAAAAAAAA\nduo.clientSecret=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nduo.api.host=example.duosecurity.com\nduo.redirect.uri=http://localhost:8080\nduo.failmode=CLOSED\n" > ./src/main/resources/application.properties
        - name: Build and test with Maven
-         run: mvn -B package
+         run: mvn -B install
        - name: Lint with checkstyle
          run: mvn checkstyle:check
        - name: Verify example starts
