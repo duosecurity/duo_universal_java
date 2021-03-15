@@ -38,7 +38,7 @@ public class Client {
 
   private static final String USER_AGENT_LIB = "duo_universal_java";
 
-  private static final String USER_AGENT_VERSION = "1.1.0";
+  private static final String USER_AGENT_VERSION = "1.1.1";
 
   // **************************************************
   // Fields
@@ -68,6 +68,12 @@ public class Client {
 
   /**
    * Legacy simple constructor.
+   * @param clientId This value is the client id provided by Duo in the admin panel.
+   * @param clientSecret This value is the client secret provided by Duo in the admin panel.
+   * @param apiHost This value is the api host provided by Duo in the admin panel.
+   * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
+   *
+   * @throws DuoException For problems building the client
    * @deprecated The constructors are deprecated.
    *     Prefer the {@link Client.Builder} for instantiating Clients
    */
@@ -79,6 +85,14 @@ public class Client {
 
   /**
    * Legacy constructor which allows specifying custom CaCerts.
+   * @param clientId This value is the client id provided by Duo in the admin panel.
+   * @param clientSecret This value is the client secret provided by Duo in the admin panel.
+   * @param apiHost This value is the api host provided by Duo in the admin panel.
+   * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
+   * @param userCaCerts This value is a list of CA Certificates used to validate connections to Duo
+   *
+   * @throws DuoException For problems building the client
+   * 
    * @deprecated The constructors are deprecated.
    *     Prefer the {@link Client.Builder} for instantiating Clients
    */
@@ -136,8 +150,6 @@ public class Client {
      * @param clientSecret This value is the client secret provided by Duo in the admin panel.
      * @param apiHost This value is the api host provided by Duo in the admin panel.
      * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
-     *
-     * @throws DuoException For problems validating the client parameters
      */
     public Builder(String clientId, String clientSecret, String apiHost,
                    String redirectUri) {
@@ -176,6 +188,8 @@ public class Client {
      * Optionally use custom CA Certificates when validating connections to Duo.
      *
      * @param userCaCerts List of CA Certificates to use
+     * 
+     * @return the Builder
      */
     public Builder setCACerts(String[] userCaCerts) {
       if (validateCaCert(userCaCerts)) {
@@ -189,6 +203,8 @@ public class Client {
      * Defaults true to use duo_code.
      *
      * @param useDuoCodeAttribute true/false toggle
+     * 
+     * @return the Builder
      */
     public Builder setUseDuoCodeAttribute(boolean useDuoCodeAttribute) {
       this.useDuoCodeAttribute = useDuoCodeAttribute;
@@ -199,6 +215,8 @@ public class Client {
      * Optionally appends string to userAgent.
      *
      * @param newUserAgent Additional info that will be added to the end of the user agent string
+     * 
+     * @return the Builder
      */
     public Builder appendUserAgentInfo(String newUserAgent) {
       userAgent = format("%s %s", userAgent, newUserAgent);
