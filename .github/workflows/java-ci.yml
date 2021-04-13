@@ -20,3 +20,5 @@ jobs:
        - name: Verify example starts
          working-directory: duo-example
          run: mvn spring-boot:start
+       - name: Verify release profile works
+         run: mvn -P release package
