@@ -17,6 +17,8 @@ public class DuoConnector {
 
   protected Retrofit retrofit;
 
+  private static final int SUCCESS_STATUS_CODE = 200;
+
   /**
    * DuoConnector Constructor.
    *
@@ -48,7 +50,7 @@ public class DuoConnector {
    *
    * @return HealthCheckResponse    Returns result from the Health Check
    *
-   * @throws DuoException           For issues sending or recieving the request
+   * @throws DuoException           For issues sending or receiving the request
    */
   public HealthCheckResponse duoHealthcheck(String clientId, String clientAssertion)
       throws DuoException {
@@ -73,9 +75,9 @@ public class DuoConnector {
    * @param clientAssertion     JWT that holds information to verify that the owner of the duoCode
    *                            is authorized to have it
    *
-   * @return TokenResponse  Returns result from the Health Check
+   * @return TokenResponse  Returns resulting response containing the JWT
    *
-   * @throws DuoException   For issues sending or recieving the request
+   * @throws DuoException   For issues sending or receiving the request, or failing to exchange a token
    */
   public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
                                                              String duoCode, String redirectUri,
@@ -87,6 +89,9 @@ public class DuoConnector {
                             grantType, duoCode, redirectUri, clientAssertionType, clientAssertion);
     try {
       Response<TokenResponse> response = callSync.execute();
+      if (response.code() != SUCCESS_STATUS_CODE || response.body() == null) {
+        throw new DuoException(response.message());
+      }
       return response.body();
     } catch (IOException e) {
       throw new DuoException(e.getMessage(), e);

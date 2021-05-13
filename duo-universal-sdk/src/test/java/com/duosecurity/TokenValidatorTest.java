@@ -60,6 +60,18 @@ class TokenValidatorTest {
 
     }
 
+    @Test
+    void nullTokenFailure() throws UnsupportedEncodingException {
+        try {
+            TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, "api-deadbeef.duosecurity.com");
+            String jwt = null;
+            validator.validateAndDecode(jwt);
+            Assertions.fail("Null jwt should throw DuoException.");
+        } catch (DuoException e) {
+            // expected
+        }
+    }
+
     // Tests to enforce issuer, audience, and preferred_username claims
     @Test
     void issuerMismatchFailure() throws UnsupportedEncodingException {

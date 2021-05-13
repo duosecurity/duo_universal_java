@@ -64,6 +64,10 @@ public final class DuoIdTokenValidator implements TokenValidator {
    */
   @Override
   public DecodedJWT validateAndDecode(String jwt) throws DuoException {
+    if (jwt == null) {
+      throw new DuoException("ID Token verification failed: Null token");
+    }
+
     try {
       JWTVerifier verifier = buildVerifier();
       return verifier.verify(jwt);
