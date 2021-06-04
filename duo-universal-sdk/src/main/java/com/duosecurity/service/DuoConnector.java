@@ -77,7 +77,8 @@ public class DuoConnector {
    *
    * @return TokenResponse  Returns resulting response containing the JWT
    *
-   * @throws DuoException   For issues sending or receiving the request, or failing to exchange a token
+   * @throws DuoException   For issues sending or receiving the request,
+                            or failing to exchange a token
    */
   public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
                                                              String duoCode, String redirectUri,
