@@ -38,7 +38,7 @@ public class Client {
 
   private static final String USER_AGENT_LIB = "duo_universal_java";
 
-  private static final String USER_AGENT_VERSION = "1.1.2-SNAPSHOT";
+  private static final String USER_AGENT_VERSION = "1.1.2";
 
   // **************************************************
   // Fields

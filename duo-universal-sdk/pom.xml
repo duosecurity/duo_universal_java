@@ -6,7 +6,7 @@
 
     <artifactId>duo-universal-sdk</artifactId>
     <groupId>com.duosecurity</groupId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
     <name>Duo Universal Java</name>
     <url>https://github.com/duosecurity/duo_universal_java/</url>
     <description>Duo Web SDK for two-factor authentication</description>
