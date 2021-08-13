@@ -33,14 +33,18 @@ public class Utils {
   static String createJwt(String clientId, String clientSecret, String aud) throws DuoException {
     Date expiration = new Date();
     expiration.setTime(expiration.getTime() + ONE_HOUR_IN_MILLISECONDS);
-    return JWT.create()
-            .withHeader(HEADERS)
-            .withIssuer(clientId)
-            .withSubject(clientId)
-            .withAudience(aud)
-            .withExpiresAt(expiration)
-            .withJWTId(generateJwtId(32))
-            .sign(Algorithm.HMAC512(clientSecret));
+    try {
+      return JWT.create()
+                  .withHeader(HEADERS)
+                  .withIssuer(clientId)
+                  .withSubject(clientId)
+                  .withAudience(aud)
+                  .withExpiresAt(expiration)
+                  .withJWTId(generateJwtId(32))
+                  .sign(Algorithm.HMAC512(clientSecret));
+    } catch (UnsupportedEncodingException e) {
+      throw new DuoException(e.getMessage(), e);
+    }
   }
 
   static String createJwtForAuthUrl(String clientId, String clientSecret, String redirectUri,
@@ -48,17 +52,21 @@ public class Utils {
                                     Boolean useDuoCodeAttribute) throws DuoException {
     Date expiration = new Date();
     expiration.setTime(expiration.getTime() + ONE_HOUR_IN_MILLISECONDS);
-    return JWT.create()
-            .withHeader(HEADERS)
-            .withExpiresAt(expiration)
-            .withClaim("scope", "openid")
-            .withClaim("client_id", clientId)
-            .withClaim("redirect_uri", redirectUri)
-            .withClaim("state", state)
-            .withClaim("duo_uname", username)
-            .withClaim("response_type", "code")
-            .withClaim("use_duo_code_attribute", useDuoCodeAttribute)
-            .sign(Algorithm.HMAC512(clientSecret));
+    try {
+      return JWT.create()
+                  .withHeader(HEADERS)
+                  .withExpiresAt(expiration)
+                  .withClaim("scope", "openid")
+                  .withClaim("client_id", clientId)
+                  .withClaim("redirect_uri", redirectUri)
+                  .withClaim("state", state)
+                  .withClaim("duo_uname", username)
+                  .withClaim("response_type", "code")
+                  .withClaim("use_duo_code_attribute", useDuoCodeAttribute)
+                  .sign(Algorithm.HMAC512(clientSecret));
+    } catch (UnsupportedEncodingException e) {
+      throw new DuoException(e.getMessage(), e);
+    }
   }
 
   static Token transformDecodedJwtToToken(DecodedJWT decodedJwt) {
