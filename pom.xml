@@ -7,7 +7,7 @@
     <groupId>com.duosecurity</groupId>
     <artifactId>duo-universal-java</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.3</version>
+    <version>1.1.4-SNAPSHOT</version>
 
     <name>Duo Universal Java</name>
     <url>https://github.com/duosecurity/duo_universal_java/</url>
