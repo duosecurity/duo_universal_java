@@ -91,7 +91,12 @@ public class DuoConnector {
     try {
       Response<TokenResponse> response = callSync.execute();
       if (response.code() != SUCCESS_STATUS_CODE || response.body() == null) {
-        throw new DuoException(response.message());
+        String message = response.message();
+        if (response.errorBody() != null) {
+          throw new DuoException(String.format("msg=%s, msg_detail=%s",
+                  message, response.errorBody().string()));
+        }
+        throw new DuoException(message);
       }
       return response.body();
     } catch (IOException e) {
