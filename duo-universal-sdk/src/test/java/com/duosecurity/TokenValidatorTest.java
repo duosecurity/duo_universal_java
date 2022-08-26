@@ -8,7 +8,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 class TokenValidatorTest {
@@ -23,7 +22,7 @@ class TokenValidatorTest {
 
     // Happy path
     @Test
-    void testValidClaimsSuccess() throws UnsupportedEncodingException {
+    void testValidClaimsSuccess() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, API_HOST);
             String jwt = createClaimsTestJwt();
@@ -34,7 +33,7 @@ class TokenValidatorTest {
     }
 
     @Test
-    void testValidNonceSuccess() throws UnsupportedEncodingException {
+    void testValidNonceSuccess() {
         try {
             String aNonce = "a_nonce";
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, API_HOST, aNonce);
@@ -61,7 +60,7 @@ class TokenValidatorTest {
     }
 
     @Test
-    void nullTokenFailure() throws UnsupportedEncodingException {
+    void nullTokenFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, "api-deadbeef.duosecurity.com");
             String jwt = null;
@@ -74,7 +73,7 @@ class TokenValidatorTest {
 
     // Tests to enforce issuer, audience, and preferred_username claims
     @Test
-    void issuerMismatchFailure() throws UnsupportedEncodingException {
+    void issuerMismatchFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, "api-deadbeef.duosecurity.com");
             String jwt = createClaimsTestJwt();
@@ -86,7 +85,7 @@ class TokenValidatorTest {
     }
 
     @Test
-    void audienceMismatchFailure() throws UnsupportedEncodingException {
+    void audienceMismatchFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, "bad_audience", API_HOST);
             String jwt = createClaimsTestJwt();
@@ -98,7 +97,7 @@ class TokenValidatorTest {
     }
 
     @Test 
-    void usernameMismatchFailure() throws UnsupportedEncodingException {
+    void usernameMismatchFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, "bad_username", EXPECTED_AUDIENCE, API_HOST);
             String jwt = createClaimsTestJwt();
@@ -110,7 +109,7 @@ class TokenValidatorTest {
     }
 
     @Test
-    void nonceNotInTokenFailure() throws UnsupportedEncodingException {
+    void nonceNotInTokenFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, "bad_username", EXPECTED_AUDIENCE, API_HOST, "nonce");
             String jwt = createClaimsTestJwt();
@@ -123,7 +122,7 @@ class TokenValidatorTest {
 
     // Tests for the allowed leeway on issued at and expiration claims
     @Test
-    void withinDuoLeewaySuccess() throws UnsupportedEncodingException {
+    void withinDuoLeewaySuccess() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, API_HOST);
             // Duo default leeway is 60 seconds; this expired 30 seconds ago
@@ -135,7 +134,7 @@ class TokenValidatorTest {
     }
 
     @Test
-    void outsideDuoLeewayFailure() throws UnsupportedEncodingException {
+    void outsideDuoLeewayFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator(GOOD_SECRET, EXPECTED_USERNAME, EXPECTED_AUDIENCE, API_HOST);
             // Duo default leeway is 60 seconds; this expired 90 seconds ago
@@ -149,7 +148,7 @@ class TokenValidatorTest {
 
     // Tests for the signature check
     @Test 
-    void secretMismatchFailure() throws UnsupportedEncodingException {
+    void secretMismatchFailure() {
         try {
             TokenValidator validator = new DuoIdTokenValidator("bad_secret", EXPECTED_USERNAME, EXPECTED_AUDIENCE, API_HOST, "nonce");
             String jwt = createClaimsTestJwt();
@@ -161,7 +160,7 @@ class TokenValidatorTest {
     }
 
     @Test 
-    void alteredPayloadFailure() throws UnsupportedEncodingException {
+    void alteredPayloadFailure() {
         String jwt1 = createClaimsTestJwt();
         String jwt2 = createClaimsTestJwt(secondsAgo(10), secondsAgo(10));
         String[] jwt1Pieces = jwt1.split("\\.");
@@ -179,11 +178,11 @@ class TokenValidatorTest {
     }
    
     // Helper functions
-    private String createClaimsTestJwt() throws UnsupportedEncodingException {
+    private String createClaimsTestJwt() {
         return this.createClaimsTestJwt(new Date(), new Date());
     }
 
-    private String createClaimsTestJwt(Date issued, Date expiration) throws UnsupportedEncodingException {
+    private String createClaimsTestJwt(Date issued, Date expiration) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("algorithm", "HS512");
         headers.put("type", "JWT");

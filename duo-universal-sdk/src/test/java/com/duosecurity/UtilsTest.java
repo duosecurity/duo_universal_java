@@ -7,7 +7,6 @@ import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ class UtilsTest {
 
     private static final String CLIENT_SECRET = "my_client_secret";
 
-    private static String createTestJWT() throws UnsupportedEncodingException {
+    private static String createTestJWT() {
         Map<String, Object> headers = new HashMap<>();
         headers.put("algorithm", "HS512");
         headers.put("type", "JWT");
@@ -70,7 +69,7 @@ class UtilsTest {
     }
 
     @Test
-    void transformDecodedJwtToToken() throws UnsupportedEncodingException {
+    void transformDecodedJwtToToken() {
         String jwt = createTestJWT();    
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT =  JWT.decode(jwt);

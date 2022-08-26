@@ -7,7 +7,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
 import com.duosecurity.exception.DuoException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * A JWT ID Token Validator that enforces Duo's claim requirements.
@@ -71,7 +70,7 @@ public final class DuoIdTokenValidator implements TokenValidator {
     try {
       JWTVerifier verifier = buildVerifier();
       return verifier.verify(jwt);
-    } catch (JWTVerificationException | UnsupportedEncodingException e) {
+    } catch (JWTVerificationException e) {
       throw new DuoException("ID Token verification failed", e);
     }
   }
@@ -79,7 +78,7 @@ public final class DuoIdTokenValidator implements TokenValidator {
   /**
    * Build a JWT verifier that will enforce the claims as described above.
    */
-  private JWTVerifier buildVerifier() throws UnsupportedEncodingException {
+  private JWTVerifier buildVerifier() {
     Algorithm signingAlgorithm = Algorithm.HMAC512(this.clientSecret);
     Verification verifier = JWT.require(signingAlgorithm)
                                .withIssuer(this.issuer)
