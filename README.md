@@ -31,6 +31,10 @@ The Duo Universal Client for Java is available from Duo Security on Maven.  Incl
 ```
 See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.1.3 for more details.
 
+## TLS 1.2 and 1.3 Support
+
+Duo_universal_java uses the Java cryptography libraries for TLS operations. Both TLS 1.2 and 1.3 are supported by Java 8 and later versions.
+
 # Demo
 
 ## Build
