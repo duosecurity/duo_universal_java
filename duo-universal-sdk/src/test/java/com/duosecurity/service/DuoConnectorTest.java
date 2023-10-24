@@ -125,7 +125,7 @@ class DuoConnectorTest {
                     "client_assertion_type", "client_assertion");
             Assertions.fail();
         } catch (DuoException e) {
-            assertEquals("msg=Response.error(), msg_detail=", e.getMessage());
+            assertEquals("Response.error()", e.getMessage());
         }
     }
 

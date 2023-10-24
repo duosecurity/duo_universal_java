@@ -122,14 +122,12 @@ public class Client {
    *                     panel.
    * @param clientSecret This value is the client secret provided by Duo in the
    *                     admin panel.
-   * @param apiHost      This value is the api host provided by Duo in the admin
-   *                     panel.
+   * @param apiHost      This value is the api host provided by Duo in the admin panel.
    * @param redirectUri  This value is the uri which Duo should redirect to after
    *                     2FA is completed.
    * @param proxyHost    This value is the hostname of the proxy server
    * @param proxyPort    This value is the port number of the proxy server
-   * @param userCaCerts  This value is a list of CA Certificates used to validate
-   *                     connections to Duo
+   * @param userCaCerts  This value is a list of CA Certificates used to validate connections to Duo
    *
    * @throws DuoException For problems building the client
    *
@@ -137,9 +135,11 @@ public class Client {
    *             {@link Client.Builder} for instantiating Clients
    */
   @Deprecated
-  public Client(String clientId, String clientSecret, String apiHost, String redirectUri, String proxyHost, Integer proxyPort,
+  public Client(String clientId, String clientSecret, String apiHost,
+                String redirectUri, String proxyHost, Integer proxyPort,
                 String[] userCaCerts) throws DuoException {
-    Client client = new Builder(clientId, clientSecret, proxyHost, proxyPort, apiHost, redirectUri).setCACerts(userCaCerts)
+    Client client = new Builder(clientId, clientSecret, proxyHost, proxyPort, apiHost, redirectUri)
+            .setCACerts(userCaCerts)
             .build();
     this.clientId = client.clientId;
     this.clientSecret = client.clientSecret;
@@ -219,7 +219,8 @@ public class Client {
      * @param redirectUri  This value is the uri which Duo should redirect to after
      *                     2FA is completed.
      */
-    public Builder(String clientId, String clientSecret, String proxyHost, Integer proxyPort, String apiHost, String redirectUri) {
+    public Builder(String clientId, String clientSecret, String proxyHost,
+                   Integer proxyPort, String apiHost, String redirectUri) {
       this.clientId = clientId;
       this.clientSecret = clientSecret;
       this.apiHost = apiHost;

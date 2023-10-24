@@ -2,13 +2,12 @@ package com.duosecurity.service;
 
 import static com.duosecurity.Utils.getAndValidateUrl;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.TokenResponse;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -38,22 +37,34 @@ public class DuoConnector {
    * DuoConnector Constructor.
    *
    * @param apiHost This value is the api host provided by Duo in the admin panel.
+   * @param proxyHost This value is the proxy server hostname
+   * @param proxyPort This value is the proxy server port
    * @param caCerts CA Certificates used to connect to Duo
    *
    * @throws DuoException For issues getting and validating the URL
    */
-  public DuoConnector(String apiHost, String proxyHost, Integer proxyPort, String[] caCerts) throws DuoException {
-    CertificatePinner duoCertificatePinner = new CertificatePinner.Builder().add(apiHost, caCerts).build();
+  public DuoConnector(String apiHost, String proxyHost, Integer proxyPort, String[] caCerts)
+          throws DuoException {
+    CertificatePinner duoCertificatePinner = new CertificatePinner.Builder()
+            .add(apiHost, caCerts).build();
     OkHttpClient client;
     if (proxyHost != null && proxyPort != null) {
       Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-      client = new OkHttpClient.Builder().certificatePinner(duoCertificatePinner).proxy(proxy).build();
+      client = new OkHttpClient.Builder()
+              .certificatePinner(duoCertificatePinner)
+              .proxy(proxy)
+              .build();
     } else {
-      client = new OkHttpClient.Builder().certificatePinner(duoCertificatePinner).build();
+      client = new OkHttpClient.Builder()
+              .certificatePinner(duoCertificatePinner)
+              .build();
     }
 
-    retrofit = new Retrofit.Builder().baseUrl(getAndValidateUrl(apiHost, "").toString())
-            .addConverterFactory(JacksonConverterFactory.create()).client(client).build();
+    retrofit = new Retrofit.Builder()
+            .baseUrl(getAndValidateUrl(apiHost, "").toString())
+            .addConverterFactory(JacksonConverterFactory.create())
+            .client(client)
+            .build();
   }
 
   /**
@@ -67,7 +78,7 @@ public class DuoConnector {
    * @throws DuoException           For issues sending or receiving the request
    */
   public HealthCheckResponse duoHealthcheck(String clientId, String clientAssertion)
-      throws DuoException {
+          throws DuoException {
     DuoService service = retrofit.create(DuoService.class);
     Call<HealthCheckResponse> callSync = service.duoHealthCheck(clientId, clientAssertion);
     try {
@@ -98,7 +109,7 @@ public class DuoConnector {
                                                              String duoCode, String redirectUri,
                                                              String clientAssertionType,
                                                              String clientAssertion)
-      throws DuoException {
+          throws DuoException {
     DuoService service = retrofit.create(DuoService.class);
     Call<TokenResponse> callSync = service.exchangeAuthorizationCodeFor2FAResult(userAgent,
                             grantType, duoCode, redirectUri, clientAssertionType, clientAssertion);
