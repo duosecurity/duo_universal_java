@@ -149,7 +149,7 @@ class DuoConnectorTest {
             Assertions.fail();
         } catch (DuoException e) {
             // Response.success() is the error message because that's the default message when manually crafting
-            // a successful (200) response. This still verifies we're properly creating the DuoExpection.
+            // a successful (200) response. This still verifies we're properly creating the DuoException.
             assertEquals("Response.success()", e.getMessage());
         }
     }
