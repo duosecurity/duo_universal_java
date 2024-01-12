@@ -17,10 +17,12 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
 class ClientTest {
@@ -84,8 +86,8 @@ class ClientTest {
         try {
             URL authUrl = new URL(urlString);
             assertEquals(authUrl.getHost(), API_HOST);
-            assertTrue(authUrl.getQuery().contains("redirect_uri=" + HTTPS_REDIRECT_URI));
-            assertTrue(authUrl.getQuery().contains("client_id=" + CLIENT_ID));
+            assertTrue(authUrl.getQuery().contains("redirect_uri=" + URLEncoder.encode(HTTPS_REDIRECT_URI, StandardCharsets.UTF_8)));
+            assertTrue(authUrl.getQuery().contains("client_id=" + URLEncoder.encode(CLIENT_ID,StandardCharsets.UTF_8)));
             assertTrue(authUrl.getProtocol().equals("https"));
         } catch (MalformedURLException e) {
             Assertions.fail();

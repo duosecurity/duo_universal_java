@@ -6,8 +6,8 @@
 
     <artifactId>duo-universal-sdk</artifactId>
     <groupId>com.duosecurity</groupId>
-    <version>1.1.4-SNAPSHOT</version>
-    <name>Duo Universal Java</name>
+    <version>2.0.0-SNAPSHOT</version>
+    <name>Duo Universal Java SDK</name>
     <url>https://github.com/duosecurity/duo_universal_java/</url>
     <description>Duo Web SDK for two-factor authentication</description>
     <developers>
@@ -30,6 +30,18 @@
         <url>http://github.com/duosecurity/duo_universal_java/tree/main</url>
     </scm>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <lombok.version>1.18.30</lombok.version>
+        <okhttp.version>4.12.0</okhttp.version>
+        <jackson.version>2.16.1</jackson.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
+        <junit.version>5.10.1</junit.version>
+        <retrofit2.version>2.9.0</retrofit2.version>
+    </properties>
+
     <profiles>
         <profile>
             <id>release</id>
@@ -39,7 +51,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                            <serverId>ossrh</serverId>
@@ -51,7 +63,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -72,7 +84,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>3.3.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -86,7 +98,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>3.6.3</version>
                         <executions>
                             <execution>
                               <id>attach-javadocs</id>
@@ -103,48 +115,45 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-jackson</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.16.0</version>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
-            <version>4.0.0</version>
+            <version>${java-jwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+            <version>${retrofit2.version}</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>logging-interceptor</artifactId>
-            <version>4.9.2</version>
+            <version>${okhttp.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.0</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.11.2</version>
+            <version>5.8.0</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -152,7 +161,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.3.6.RELEASE</version>
+                <version>3.2.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -166,9 +175,6 @@
                     <execution>
                         <id>make-assembly</id>
                         <phase>package</phase>
-                        <goals>
-                            <goal>attached</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -187,7 +193,7 @@
                     <configLocation>google_checks.xml</configLocation>
                     <violationSeverity>warning</violationSeverity>
                     <encoding>UTF-8</encoding>
-                    <suppressionsLocation>suppression_checks.xml</suppressionsLocation>
+                    <suppressionsLocation>${project.basedir}/suppression_checks.xml</suppressionsLocation>
                     <logViolationsToConsole>true</logViolationsToConsole>
                     <failOnViolation>true</failOnViolation>
                     <linkXRef>false</linkXRef>
@@ -196,19 +202,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.2.0-M1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>5.2.0-M1</version>
-                    </dependency>
-                </dependencies>
+                <version>3.1.2</version>
+
             </plugin>
             <plugin>
                 <groupId>org.cyclonedx</groupId>
@@ -229,8 +224,5 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+
 </project>

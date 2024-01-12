@@ -7,8 +7,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 class Validator {
+  private Validator() {
+  }
 
-  private static final String ALPHA_NUMERIC_REGEX = "^[a-zA-z0-9]*$";
+  private static final String ALPHA_NUMERIC_REGEX = "^[a-zA-Z0-9]*$";
   private static final int MINIMUM_STATE_LENGTH = 22;
   private static final int MAXMIUM_STATE_LENGTH = 1024;
 

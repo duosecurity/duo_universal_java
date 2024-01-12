@@ -16,6 +16,9 @@ import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.Token;
 import com.duosecurity.model.TokenResponse;
 import com.duosecurity.service.DuoConnector;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 
 /**
@@ -96,7 +99,7 @@ public class Client {
    * @param userCaCerts This value is a list of CA Certificates used to validate connections to Duo
    *
    * @throws DuoException For problems building the client
-   * 
+   *
    * @deprecated The constructors are deprecated.
    *     Prefer the {@link Client.Builder} for instantiating Clients
    */
@@ -258,7 +261,7 @@ public class Client {
      * Optionally use custom CA Certificates when validating connections to Duo.
      *
      * @param userCaCerts List of CA Certificates to use
-     * 
+     *
      * @return the Builder
      */
     public Builder setCACerts(String[] userCaCerts) {
@@ -273,7 +276,7 @@ public class Client {
      * Defaults true to use duo_code.
      *
      * @param useDuoCodeAttribute true/false toggle
-     * 
+     *
      * @return the Builder
      */
     public Builder setUseDuoCodeAttribute(boolean useDuoCodeAttribute) {
@@ -285,7 +288,7 @@ public class Client {
      * Optionally appends string to userAgent.
      *
      * @param newUserAgent Additional info that will be added to the end of the user agent string
-     * 
+     *
      * @return the Builder
      */
     public Builder appendUserAgentInfo(String newUserAgent) {
@@ -343,12 +346,17 @@ public class Client {
   public String createAuthUrl(String username, String state) throws DuoException {
     validateUsername(username);
     validateState(state);
-    String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri,
-            state, username, useDuoCodeAttribute);
+    String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri, state, username,
+        useDuoCodeAttribute);
+
     String query = format(
-            "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
-            redirectUri, clientId, request);
+        "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
+          URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
+          URLEncoder.encode(clientId, StandardCharsets.UTF_8),
+          URLEncoder.encode(request, StandardCharsets.UTF_8));
     return getAndValidateUrl(apiHost, OAUTH_V_1_AUTHORIZE_ENDPOINT + query).toString();
+
+
   }
 
 

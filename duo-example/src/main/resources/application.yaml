@@ -1,0 +1,16 @@
+
+duo:
+  # Retrieve these values from the Duo Admin Panel
+  client-id: ${DUO_CLIENT_ID:DIEN9ZH50WBGER236YT5}
+  client-secret: ${DUO_CLIENT_SECRET:IZjstQj23454IB2H1qhoQj23Ws2ddZfIOGSxOGSx}
+  api-host: ${DUO_API_HOST:api-host.com}
+  redirect-url: ${DUO_REDIRECT_URL:http://localhost:8080/index}
+  # This variable is used to decide what to do if Duo is unavailable
+  fail-mode: ${DUO_FAIL_MODE:CLOSED}
+
+
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/
+      suffix: .jsp

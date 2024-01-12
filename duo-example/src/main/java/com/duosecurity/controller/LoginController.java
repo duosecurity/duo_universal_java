@@ -2,65 +2,56 @@ package com.duosecurity.controller;
 
 
 import com.duosecurity.Client;
+import com.duosecurity.DuoProperties;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.Token;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+
+/**
+ * The Login Controller.
+ */
 @Controller
 public class LoginController {
-
-  @Value("${duo.api.host}")
-  private String apiHost;
-
-  @Value("${duo.clientId}")
-  private String clientId;
-
-  @Value("${duo.clientSecret}")
-  private String clientSecret;
-
-  @Value("${duo.redirect.uri}")
-  private String redirectUri;
-
-  @Value("${duo.failmode}")
-  private String failmode;
-
-  private Map<String, String> stateMap;
-
-  private Client duoClient;
+  private static final String JSP_INDEX = "index";
+  private static final String JSP_WELCOME = "welcome";
+  private static final String ATTR_MESSAGE = "message";
+  private final Map<String, String> stateMap = new HashMap<>();
+  private final Client duoClient;
+  private final ObjectMapper objectMapper;
+  private final DuoProperties duoProperties;
 
   /**
-   * Create and initialize the Duo Client.
+   * Constructor for LoginController.
    *
-   * @throws DuoException For problems creating the Clients
+   * @param duoClient the duoClient
+   * @param objectMapper jackson ObjectMapper
+   * @param duoProperties DuoClient configuration properties
    */
-  @PostConstruct
-  public void initializeDuoClient() throws DuoException {
-    stateMap = new HashMap<>();
-    duoClient = new Client.Builder(clientId, clientSecret, apiHost, redirectUri).build();
-
-    /* Example of setting optional fields
-    duoClient = new Client.Builder(clientId, clientSecret, apiHost, redirectUri)
-            .setUseDuoCodeAttribute(false)
-            .setCACerts(customCerts)
-            .appendUserAgentInfo("custom string")
-            .build();
-    */
+  public LoginController(Client duoClient, ObjectMapper objectMapper, DuoProperties duoProperties) {
+    this.duoClient = duoClient;
+    this.objectMapper = objectMapper;
+    this.duoProperties = duoProperties;
   }
 
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+
+  /**
+   * Main Landing page.
+   *
+   * @return The index view
+   */
+  @GetMapping(value = "/")
   public String index() {
-    return "index";
+    return JSP_INDEX;
   }
 
   /**
@@ -71,13 +62,13 @@ public class LoginController {
    *
    * @return ModelAndView   A model that contains information about where to redirect next
    */
-  @RequestMapping(value = "/", method = RequestMethod.POST)
+  @PostMapping(value = "/")
   public ModelAndView login(@RequestParam String username, @RequestParam String password)
       throws DuoException {
     // Perform fake primary authentication
     if (!validateUser(username, password)) {
-      ModelAndView model = new ModelAndView("/index");
-      model.addObject("message", "Invalid Credentials");
+      ModelAndView model = new ModelAndView(JSP_INDEX);
+      model.addObject(ATTR_MESSAGE, "Invalid Credentials");
       return model;
     }
 
@@ -87,15 +78,15 @@ public class LoginController {
     } catch (DuoException exception) {
       // If the health check failed AND the integration is configured to fail open then render
       // the welcome page.  If the integarion is configured to fail closed return an error
-      if ("OPEN".equalsIgnoreCase(failmode)) {
-        ModelAndView model = new ModelAndView("/welcome");
+      if ("OPEN".equalsIgnoreCase(duoProperties.failMode())) {
+        ModelAndView model = new ModelAndView(JSP_WELCOME);
         model.addObject("token", "Login Successful, but 2FA Not Performed."
-                + "Confirm application.properties values are correct and that Duo is reachable");
+                + "Confirm application.yaml values are correct and that Duo is reachable");
         return model;
       } else {
-        ModelAndView model = new ModelAndView("/index");
-        model.addObject("message", "2FA Unavailable."
-                + "Confirm application.properties values are correct and that Duo is reachable");
+        ModelAndView model = new ModelAndView(JSP_INDEX);
+        model.addObject(ATTR_MESSAGE, "2FA Unavailable."
+                + "Confirm application.yaml values are correct and that Duo is reachable");
         return model;
       }
     }
@@ -107,9 +98,8 @@ public class LoginController {
 
     // Step 4: Create the authUrl and redirect to it
     String authUrl = duoClient.createAuthUrl(username, state);
-    ModelAndView model = new ModelAndView("/redirect");
-    model.addObject("authURL", authUrl);
-    return model;
+    return new ModelAndView("redirect:" + authUrl);
+
   }
 
   /**
@@ -120,14 +110,14 @@ public class LoginController {
    *
    * @return ModelAndView   A model that contains information about where to redirect next
    */
-  @RequestMapping(value = "/duo-callback", method = RequestMethod.GET)
+  @GetMapping(value = "/duo-callback")
   public ModelAndView duoCallback(@RequestParam("duo_code") String duoCode,
                                   @RequestParam("state") String state) throws DuoException {
     // Step 5: Validate state returned from Duo is the same as the one saved previously.
     // If it isn't return an error
     if (!stateMap.containsKey(state)) {
-      ModelAndView model = new ModelAndView("/index");
-      model.addObject("message", "Session Expired");
+      ModelAndView model = new ModelAndView(JSP_INDEX);
+      model.addObject(ATTR_MESSAGE, "Session Expired");
       return model;
     }
     // Remove state from the list of valid sessions
@@ -138,18 +128,17 @@ public class LoginController {
 
     // If the auth was successful, render the welcome page otherwise return an error
     if (authWasSuccessful(token)) {
-      ModelAndView model = new ModelAndView("/welcome");
+      ModelAndView model = new ModelAndView(JSP_WELCOME);
       model.addObject("token", tokenToJson(token));
       return model;
     } else {
-      ModelAndView model = new ModelAndView("/index");
-      model.addObject("message", "2FA Failed");
+      ModelAndView model = new ModelAndView(JSP_INDEX);
+      model.addObject(ATTR_MESSAGE, "2FA Failed");
       return model;
     }
   }
 
-  private static String tokenToJson(Token token) throws DuoException {
-    ObjectMapper objectMapper = new ObjectMapper();
+  private String tokenToJson(Token token) throws DuoException {
     try {
       return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(token);
     } catch (JsonProcessingException jpe) {
@@ -166,17 +155,14 @@ public class LoginController {
    */
   @ExceptionHandler({DuoException.class})
   public ModelAndView handleException(DuoException ex) {
-    ModelAndView model = new ModelAndView("/index");
-    model.addObject("message", ex.getMessage());
+    ModelAndView model = new ModelAndView(JSP_INDEX);
+    model.addObject(ATTR_MESSAGE, ex.getMessage());
     return model;
   }
 
   private boolean validateUser(String username, String password) {
-    if (username == null || username.isEmpty()
-        || password == null || password.isEmpty()) {
-      return false;
-    }
-    return true;
+    return username != null && !username.isBlank()
+        && password != null && !password.isBlank();
   }
 
   private boolean authWasSuccessful(Token token) {
