@@ -16,6 +16,9 @@ import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.Token;
 import com.duosecurity.model.TokenResponse;
 import com.duosecurity.service.DuoConnector;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 
 /**
@@ -53,10 +56,6 @@ public class Client {
 
   private Boolean useDuoCodeAttribute;
 
-  private String proxyHost;
-
-  private Integer proxyPort;
-
   protected DuoConnector duoConnector;
 
   private String userAgent;
@@ -70,87 +69,6 @@ public class Client {
   private Client() {
   }
 
-  /**
-   * Legacy simple constructor.
-   * @param clientId This value is the client id provided by Duo in the admin panel.
-   * @param clientSecret This value is the client secret provided by Duo in the admin panel.
-   * @param apiHost This value is the api host provided by Duo in the admin panel.
-   * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
-   *
-   * @throws DuoException For problems building the client
-   * @deprecated The constructors are deprecated.
-   *     Prefer the {@link Client.Builder} for instantiating Clients
-   */
-  @Deprecated
-  public Client(String clientId, String clientSecret, String apiHost, String redirectUri)
-      throws DuoException {
-    this(clientId, clientSecret, apiHost, redirectUri, null);
-  }
-
-  /**
-   * Legacy constructor which allows specifying custom CaCerts.
-   * @param clientId This value is the client id provided by Duo in the admin panel.
-   * @param clientSecret This value is the client secret provided by Duo in the admin panel.
-   * @param apiHost This value is the api host provided by Duo in the admin panel.
-   * @param redirectUri This value is the uri which Duo should redirect to after 2FA is completed.
-   * @param userCaCerts This value is a list of CA Certificates used to validate connections to Duo
-   *
-   * @throws DuoException For problems building the client
-   * 
-   * @deprecated The constructors are deprecated.
-   *     Prefer the {@link Client.Builder} for instantiating Clients
-   */
-  @Deprecated
-  public Client(String clientId, String clientSecret, String apiHost,
-              String redirectUri, String[] userCaCerts) throws DuoException {
-    Client client = new Builder(clientId, clientSecret, apiHost, redirectUri)
-            .setCACerts(userCaCerts)
-            .build();
-    this.clientId = client.clientId;
-    this.clientSecret = client.clientSecret;
-    this.apiHost = client.apiHost;
-    this.redirectUri = client.redirectUri;
-    this.useDuoCodeAttribute = client.useDuoCodeAttribute;
-    this.duoConnector = client.duoConnector;
-    this.userAgent = client.userAgent;
-  }
-
-  /**
-   * Legacy constructor which allows specifying custom CaCerts.
-   *
-   * @param clientId     This value is the client id provided by Duo in the admin
-   *                     panel.
-   * @param clientSecret This value is the client secret provided by Duo in the
-   *                     admin panel.
-   * @param apiHost      This value is the api host provided by Duo in the admin panel.
-   * @param redirectUri  This value is the uri which Duo should redirect to after
-   *                     2FA is completed.
-   * @param proxyHost    This value is the hostname of the proxy server
-   * @param proxyPort    This value is the port number of the proxy server
-   * @param userCaCerts  This value is a list of CA Certificates used to validate connections to Duo
-   *
-   * @throws DuoException For problems building the client
-   *
-   * @deprecated The constructors are deprecated. Prefer the
-   *             {@link Client.Builder} for instantiating Clients
-   */
-  @Deprecated
-  public Client(String clientId, String clientSecret, String apiHost,
-                String redirectUri, String proxyHost, Integer proxyPort,
-                String[] userCaCerts) throws DuoException {
-    Client client = new Builder(clientId, clientSecret, proxyHost, proxyPort, apiHost, redirectUri)
-            .setCACerts(userCaCerts)
-            .build();
-    this.clientId = client.clientId;
-    this.clientSecret = client.clientSecret;
-    this.apiHost = client.apiHost;
-    this.redirectUri = client.redirectUri;
-    this.useDuoCodeAttribute = client.useDuoCodeAttribute;
-    this.duoConnector = client.duoConnector;
-    this.userAgent = client.userAgent;
-    this.proxyHost = client.proxyHost;
-    this.proxyPort = client.proxyPort;
-  }
 
   public static class Builder {
     private final String clientId;
@@ -258,7 +176,7 @@ public class Client {
      * Optionally use custom CA Certificates when validating connections to Duo.
      *
      * @param userCaCerts List of CA Certificates to use
-     * 
+     *
      * @return the Builder
      */
     public Builder setCACerts(String[] userCaCerts) {
@@ -273,7 +191,7 @@ public class Client {
      * Defaults true to use duo_code.
      *
      * @param useDuoCodeAttribute true/false toggle
-     * 
+     *
      * @return the Builder
      */
     public Builder setUseDuoCodeAttribute(boolean useDuoCodeAttribute) {
@@ -285,7 +203,7 @@ public class Client {
      * Optionally appends string to userAgent.
      *
      * @param newUserAgent Additional info that will be added to the end of the user agent string
-     * 
+     *
      * @return the Builder
      */
     public Builder appendUserAgentInfo(String newUserAgent) {
@@ -321,7 +239,7 @@ public class Client {
     String aud = getAndValidateUrl(apiHost, OAUTH_V_1_HEALTH_CHECK_ENDPOINT).toString();
     HealthCheckResponse response = duoConnector.duoHealthcheck(clientId,
                 createJwt(clientId, clientSecret, aud));
-    if (!response.wasSuccess()) {
+    if (Boolean.FALSE.equals(response.wasSuccess())) {
       throw new DuoException(response.getMessage());
     }
     return response;
@@ -343,12 +261,17 @@ public class Client {
   public String createAuthUrl(String username, String state) throws DuoException {
     validateUsername(username);
     validateState(state);
-    String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri,
-            state, username, useDuoCodeAttribute);
+    String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri, state, username,
+        useDuoCodeAttribute);
+
     String query = format(
-            "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
-            redirectUri, clientId, request);
+        "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
+          URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
+          URLEncoder.encode(clientId, StandardCharsets.UTF_8),
+          URLEncoder.encode(request, StandardCharsets.UTF_8));
     return getAndValidateUrl(apiHost, OAUTH_V_1_AUTHORIZE_ENDPOINT + query).toString();
+
+
   }
 
 

@@ -1,5 +1,7 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>Example Page</title>
         <link rel="stylesheet" href='style.css'>
     </head>
     <body>

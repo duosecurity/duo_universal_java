@@ -1,10 +1,12 @@
 package com.duosecurity.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
 
 @Data
 public class Token implements Serializable {
+  @Serial
   private static final long serialVersionUID = -8768823399834806194L;
 
   private String iss;

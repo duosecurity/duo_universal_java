@@ -22,12 +22,21 @@ import java.util.Date;
 import java.util.Map;
 
 public class Utils {
+  private Utils(){/*This is a utility class*/}
 
   private static final int ONE_HOUR_IN_MILLISECONDS = 3600000;
 
   private static final String HTTPS = "https";
 
   private static final Map<String, Object> HEADERS = Collections.singletonMap("alg", "HS512");
+
+  private static String getString(String key, Map<String,Object> map){
+    return map.containsKey(key) && map.get(key) != null ? map.get(key).toString() : null;
+  }
+
+  private static Map<String,Object> getAndCast(String key, Map<String,Object> map){
+    return map.containsKey(key) && map.get(key) != null? (Map<String,Object>) map.get(key) : Collections.emptyMap();
+  }
 
   static String createJwt(String clientId, String clientSecret, String aud) {
     Date expiration = new Date();
@@ -63,7 +72,7 @@ public class Utils {
   static Token transformDecodedJwtToToken(DecodedJWT decodedJwt) {
     Token token = new Token();
     token.setIat(decodedJwt.getClaim("iat").asDouble());
-    token.setIss(decodedJwt.getClaim("iss").asString());
+    token.setIss(decodedJwt.getIssuer());
     token.setAud(decodedJwt.getClaim("aud").asString());
     token.setPreferred_username(decodedJwt.getClaim("preferred_username").asString());
 
@@ -80,10 +89,7 @@ public class Utils {
   }
 
   static boolean validateCaCert(String[] userCaCerts) {
-    if (userCaCerts == null || userCaCerts.length == 0) {
-      return false;
-    }
-    return true;
+      return userCaCerts != null && userCaCerts.length != 0;
   }
 
   /**
@@ -128,100 +134,60 @@ public class Utils {
   }
 
   private static AuthContext getAuthContext(Map<String, Object> authContextMap) {
-    AuthContext authContext = new AuthContext();
-    authContext.setResult(authContextMap.containsKey("result")
-                          && authContextMap.get("result") != null
-                          ? authContextMap.get("result").toString() : null);
-    authContext.setTimestamp(authContextMap.containsKey("timestamp")
-                             && authContextMap.get("timestamp") != null
-                             ? (Integer) authContextMap.get("timestamp") : null);
-    authContext.setAuth_device(getAuthDevice(authContextMap));
-    authContext.setTxid(authContextMap.containsKey("txid")
-                        && authContextMap.get("txid") != null
-                        ? authContextMap.get("txid").toString() : null);
-    authContext.setEvent_type(authContextMap.containsKey("event_type")
-                              && authContextMap.get("event_type") != null
-                              ? authContextMap.get("event_type").toString() : null);
-    authContext.setReason(authContextMap.containsKey("reason")
-                          && authContextMap.get("reason") != null
-                          ? authContextMap.get("reason").toString() : null);
-    authContext.setAccess_device(getAccessDevice(authContextMap));
-    authContext.setApplication(getApplication(authContextMap));
-    authContext.setFactor(authContextMap.containsKey("factor")
-                          && authContextMap.get("factor") != null
-                          ? authContextMap.get("factor").toString() : null);
-    authContext.setUser(getUser(authContextMap));
-    return authContext;
+    return new AuthContext()
+      .setResult(getString("result",authContextMap))
+      .setTimestamp(authContextMap.containsKey("timestamp") && authContextMap.get("timestamp") != null ? (Integer) authContextMap.get("timestamp") : null)
+      .setAuth_device(getAuthDevice(authContextMap))
+      .setTxid(getString("txid",authContextMap))
+      .setEvent_type(getString("event_type",authContextMap))
+      .setReason(getString("reason",authContextMap))
+      .setAccess_device(getAccessDevice(authContextMap))
+      .setApplication(getApplication(authContextMap))
+      .setFactor(getString("factor",authContextMap))
+      .setUser(getUser(authContextMap));
   }
 
   private static AuthResult getAuthResult(Map<String, Object> authResultMap) {
-    AuthResult authResult = new AuthResult();
-    authResult.setStatus_msg(authResultMap.containsKey("status_msg")
-                             && authResultMap.get("status_msg") != null
-                             ? authResultMap.get("status_msg").toString() : null);
-    authResult.setStatus(authResultMap.containsKey("status")
-                         && authResultMap.get("status") != null
-                         ? authResultMap.get("status").toString() : null);
-    authResult.setResult(authResultMap.containsKey("result")
-                         && authResultMap.get("result") != null
-                         ? authResultMap.get("result").toString() : null);
-    return authResult;
+    return new AuthResult()
+      .setStatus_msg(getString("status_msg",authResultMap))
+      .setStatus(getString("status",authResultMap))
+      .setResult(getString("result",authResultMap));
   }
 
   private static User getUser(Map<String, Object> authContextMap) {
     User user = new User();
-    Map userMap = authContextMap.containsKey("user") && authContextMap.get("user") != null
-                   ? (Map) authContextMap.get("user") : null;
+    Map<String,Object> userMap = getAndCast("user",authContextMap);
     if (userMap != null) {
-      user.setKey(userMap.containsKey("key") && userMap.get("key") != null
-                  ? userMap.get("key").toString() : null);
-      user.setName(userMap.containsKey("name") && userMap.get("name") != null
-                   ? userMap.get("name").toString() : null);
+      user.setKey(getString("key",userMap));
+      user.setName(getString("name",userMap));
     }
     return user;
   }
 
   private static Application getApplication(Map<String, Object> authContextMap) {
     Application application = new Application();
-    Map applicationMap = authContextMap.containsKey("application")
-                          && authContextMap.get("application") != null
-                          ? (Map) authContextMap.get("application") : null;
+    Map<String,Object> applicationMap = getAndCast("application",authContextMap);
     if (applicationMap != null) {
-      application.setKey(applicationMap.containsKey("key")
-                         && applicationMap.get("key") != null
-                         ? applicationMap.get("key").toString() : null);
-      application.setName(applicationMap.containsKey("name")
-                          && applicationMap.get("name") != null
-                          ? applicationMap.get("name").toString() : null);
+      application.setKey(getString("key",applicationMap));
+      application.setName(getString("name",applicationMap));
     }
     return application;
   }
 
   private static AccessDevice getAccessDevice(Map<String, Object> authContextMap) {
     AccessDevice accessDevice = new AccessDevice();
-    Map accessDeviceMap = authContextMap.containsKey("access_device")
-                            && authContextMap.get("access_device") != null
-                            ? (Map) authContextMap.get("access_device") : null;
+
+    Map<String,Object> accessDeviceMap = getAndCast("access_device",authContextMap);
     if (accessDeviceMap != null) {
-      accessDevice.setIp(accessDeviceMap.containsKey("ip")
-                         && accessDeviceMap.get("ip") != null
-                         ? accessDeviceMap.get("ip").toString() : null);
-      accessDevice.setHostname(accessDeviceMap.containsKey("hostname")
-                               && accessDeviceMap.get("hostname") != null
-                               ? accessDeviceMap.get("hostname").toString() : null);
+      accessDevice.setIp(getString("ip",accessDeviceMap));
+      accessDevice.setHostname(getString("hostname",accessDeviceMap));
       if (accessDeviceMap.containsKey("location")
           && accessDeviceMap.get("location") != null) {
-        Map accessDeviceLocationMap = (Map) accessDeviceMap.get("location");
+        Map<String,Object> accessDeviceLocationMap = getAndCast("location",accessDeviceMap);
         Location accessDeviceLocation = new Location();
-        accessDeviceLocation.setCity(accessDeviceLocationMap.containsKey("city")
-                                 && accessDeviceLocationMap.get("city") != null
-                                 ? accessDeviceLocationMap.get("city").toString() : null);
-        accessDeviceLocation.setState(accessDeviceLocationMap.containsKey("state")
-                                 && accessDeviceLocationMap.get("state") != null
-                                 ? accessDeviceLocationMap.get("state").toString() : null);
-        accessDeviceLocation.setCountry(accessDeviceLocationMap.containsKey("country")
-                               && accessDeviceLocationMap.get("country") != null
-                               ? accessDeviceLocationMap.get("country").toString() : null);
+        accessDeviceLocation.setCity(getString("city",accessDeviceLocationMap));
+        accessDeviceLocation.setState(getString("state",accessDeviceLocationMap));
+        accessDeviceLocation.setCountry(getString("country",accessDeviceLocationMap));
         accessDevice.setLocation(accessDeviceLocation);
       }
     }
@@ -230,26 +196,16 @@ public class Utils {
 
   private static AuthDevice getAuthDevice(Map<String, Object> authContextMap) {
     AuthDevice authDevice = new AuthDevice();
-    Map authDeviceMap = authContextMap.containsKey("auth_device")
-                          && authContextMap.get("auth_device") != null
-                          ? (Map) authContextMap.get("auth_device") : null;
+    Map<String,Object> authDeviceMap = getAndCast("auth_device",authContextMap);
     if (authDeviceMap != null) {
-      authDevice.setIp(authDeviceMap.containsKey("ip") && authDeviceMap.get("ip") != null
-                       ? authDeviceMap.get("ip").toString() : null);
-      authDevice.setName(authDeviceMap.containsKey("name") && authDeviceMap.get("name") != null
-                         ? authDeviceMap.get("name").toString() : null);
+      authDevice.setIp(getString("ip",authDeviceMap));
+      authDevice.setName(getString("name",authDeviceMap));
       if (authDeviceMap.containsKey("location") && authDeviceMap.get("location") != null) {
-        Map authDeviceLocationMap = (Map) authDeviceMap.get("location");
+        Map<String,Object> authDeviceLocationMap = getAndCast("location",authDeviceMap);
         Location authDeviceLocation = new Location();
-        authDeviceLocation.setCity(authDeviceLocationMap.containsKey("city")
-                                   && authDeviceLocationMap.get("city") != null
-                                   ? authDeviceLocationMap.get("city").toString() : null);
-        authDeviceLocation.setState(authDeviceLocationMap.containsKey("state")
-                                    && authDeviceLocationMap.get("state") != null
-                                    ? authDeviceLocationMap.get("state").toString() : null);
-        authDeviceLocation.setCountry(authDeviceLocationMap.containsKey("country")
-                                      && authDeviceLocationMap.get("country") != null
-                                      ? authDeviceLocationMap.get("country").toString() : null);
+        authDeviceLocation.setCity(getString("city",authDeviceLocationMap));
+        authDeviceLocation.setState(getString("state",authDeviceLocationMap));
+        authDeviceLocation.setCountry(getString("country",authDeviceLocationMap));
         authDevice.setLocation(authDeviceLocation);
       }
     }

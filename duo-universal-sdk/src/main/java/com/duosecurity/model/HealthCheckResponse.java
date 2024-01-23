@@ -2,12 +2,15 @@ package com.duosecurity.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
 
 @Data
 public class HealthCheckResponse implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 8515018216883786859L;
 
   private String stat;

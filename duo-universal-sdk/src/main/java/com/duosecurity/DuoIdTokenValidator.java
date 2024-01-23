@@ -31,7 +31,7 @@ public final class DuoIdTokenValidator implements TokenValidator {
   private final String audience;
   private final String issuer;
   private final String nonce;
-  private long leeway = DUO_LEEWAY;
+  private final long leeway = DUO_LEEWAY;
 
   public DuoIdTokenValidator(String clientSecret, String username,
                              String audience, String apiHost) {

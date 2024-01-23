@@ -16,7 +16,7 @@ What's here:
 * `duo-example` - An example web application with Duo integrated
 
 # Usage
-This library requires Java 8 or later (tested through Java 16) and uses Maven to build the JAR files.
+This library requires Java 17 or later and uses Maven to build the JAR files.
 
 Run `mvn package` to generate a JAR with dependencies, suitable for inclusion in a web application.
 
@@ -26,10 +26,10 @@ The Duo Universal Client for Java is available from Duo Security on Maven.  Incl
 <dependency>
     <groupId>com.duosecurity</groupId>
     <artifactId>duo-universal-sdk</artifactId>
-    <version>1.1.3</version>
+    <version>2.0.0</version>
 </dependency>
 ```
-See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.1.3 for more details.
+See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/2.0.0 for more details.
 
 ## TLS 1.2 and 1.3 Support
 
@@ -45,7 +45,7 @@ From the root directory run:
 
 ## Run
 
-In order to run this project, ensure the values in `application.properties` are filled out with the values
+In order to run this project, ensure the values in `application.yaml` are filled out with the values
 from the Duo Admin Panel (clientId, clientSecret, api.host, and redirect.uri)
 
 From the root of the `duo-example` project run the following to start the server:
