@@ -33,7 +33,7 @@ class UtilsTest {
         authContext.setApplication(new Application());
         authContext.setUser(new User());
 
-        String jwt = JWT.create()
+        return JWT.create()
             .withHeader(headers)
             .withIssuer("issuer")
             .withSubject("test")
@@ -45,7 +45,6 @@ class UtilsTest {
             .withClaim("auth_result", String.valueOf(new AuthResult()))
             .sign(Algorithm.HMAC512(CLIENT_SECRET));
 
-        return jwt;
     }
 
     @Test
@@ -53,8 +52,8 @@ class UtilsTest {
         String jwt = Utils.createJwt("my_client_id", CLIENT_SECRET, "my_aud");
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT = JWT.decode(jwt);
-        assertEquals(decodedJWT.getClaim("iss").asString(), "my_client_id");
-        assertEquals(decodedJWT.getClaim("aud").asString(), "my_aud");
+        assertEquals("my_client_id",decodedJWT.getClaim("iss").asString());
+        assertEquals("my_aud",decodedJWT.getClaim("aud").asString());
     }
 
     @Test
@@ -62,10 +61,10 @@ class UtilsTest {
         String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username", true);
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT = JWT.decode(jwt);
-        assertEquals(decodedJWT.getClaim("client_id").asString(), "my_client_id");
-        assertEquals(decodedJWT.getClaim("redirect_uri").asString(), "my_redirect_uri");
-        assertEquals(decodedJWT.getClaim("state").asString(), "my_state");
-        assertEquals(decodedJWT.getClaim("duo_uname").asString(), "my_username");
+        assertEquals("my_client_id", decodedJWT.getClaim("client_id").asString());
+        assertEquals("my_redirect_uri", decodedJWT.getClaim("redirect_uri").asString() );
+        assertEquals("my_state", decodedJWT.getClaim("state").asString());
+        assertEquals("my_username", decodedJWT.getClaim("duo_uname").asString());
     }
 
     @Test

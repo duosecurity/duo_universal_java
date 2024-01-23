@@ -1,10 +1,14 @@
 package com.duosecurity.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class AuthContext implements Serializable {
+  @Serial
   private static final long serialVersionUID = -2431823399834806194L;
 
   private String result;

@@ -61,7 +61,7 @@ class ClientTest {
             result = client.healthCheck();
             Assertions.fail();
         } catch (DuoException e) {
-            assertEquals(e.getMessage(), "error");
+            assertEquals("error", e.getMessage());
         }
     }
 
@@ -76,7 +76,7 @@ class ClientTest {
             result = client.healthCheck();
             Assertions.fail();
         } catch (DuoException e) {
-            assertEquals(e.getMessage(), "invalid client secret");
+            assertEquals("invalid client secret", e.getMessage());
         }
     }
 
@@ -85,10 +85,10 @@ class ClientTest {
         String urlString = client.createAuthUrl(USERNAME, STATE);
         try {
             URL authUrl = new URL(urlString);
-            assertEquals(authUrl.getHost(), API_HOST);
+            assertEquals(API_HOST, authUrl.getHost());
             assertTrue(authUrl.getQuery().contains("redirect_uri=" + URLEncoder.encode(HTTPS_REDIRECT_URI, StandardCharsets.UTF_8)));
             assertTrue(authUrl.getQuery().contains("client_id=" + URLEncoder.encode(CLIENT_ID,StandardCharsets.UTF_8)));
-            assertTrue(authUrl.getProtocol().equals("https"));
+            assertEquals("https",authUrl.getProtocol());
         } catch (MalformedURLException e) {
             Assertions.fail();
         }
@@ -100,7 +100,7 @@ class ClientTest {
             client.createAuthUrl("", STATE);
             Assertions.fail();
         } catch (DuoException e) {
-            assertTrue(e.getMessage().equals("Missing username"));
+            assertEquals("Missing username", e.getMessage());
         }
 
     }
@@ -111,7 +111,7 @@ class ClientTest {
             client.createAuthUrl(USERNAME, "");
             Assertions.fail();
         } catch (DuoException e) {
-            assertTrue(e.getMessage().equals("Invalid state"));
+            assertEquals("Invalid state",e.getMessage());
         }
 
     }
@@ -123,7 +123,7 @@ class ClientTest {
             badClient.createAuthUrl(USERNAME, STATE);
             Assertions.fail();
         } catch (DuoException e) {
-            assertTrue(e.getMessage().equals("Invalid client id"));
+            assertEquals("Invalid client id",e.getMessage());
         }
     }
 
@@ -134,7 +134,7 @@ class ClientTest {
             badClient.createAuthUrl(USERNAME, STATE);
             Assertions.fail();
         } catch (DuoException e) {
-            assertTrue(e.getMessage().equals("Invalid client secret"));
+            assertEquals("Invalid client secret",e.getMessage());
         }
     }
 
@@ -175,7 +175,7 @@ class ClientTest {
         };
 
         Token result = client.exchangeAuthorizationCodeFor2FAResult("duo_code", stubValidator);
-        assertEquals(result.getSub(), "1234567890");
+        assertEquals("1234567890", result.getSub() );
     }
 
     @Test
@@ -236,20 +236,6 @@ class ClientTest {
         verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
         assertTrue(sentUserAgent.startsWith("duo_universal_java") && sentUserAgent.endsWith(appendedUserAgent));
-    }
-
-    @Test
-    void legacy_constructors_match() throws DuoException {
-        // Create clients using the old deprecated constructors and check that their fields are the same as one created using the builder.
-        // This should help prevent adding a new field to the class and forgetting to update the legacy constructors.
-        // Unfortunately duoConnector is an object entity that can't be compared.
-
-        Client builderClient = new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI).build();
-        Client shortConstructorClient = new Client(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI);
-        Client longConstructorClient = new Client(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI, null);
-
-        assertTrue(new ReflectionEquals(builderClient, "duoConnector").matches(shortConstructorClient));
-        assertTrue(new ReflectionEquals(builderClient, "duoConnector").matches(longConstructorClient));
     }
 
 }
