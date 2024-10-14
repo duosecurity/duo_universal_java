@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>duo-example</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.2.0</version>
     <name>Duo Universal Java</name>
     <url>https://github.com/duosecurity/duo_universal_java/</url>
     <description>Duo Web SDK for two-factor authentication</description>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.duosecurity</groupId>
             <artifactId>duo-universal-sdk</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
