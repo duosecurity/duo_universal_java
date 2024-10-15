@@ -11,21 +11,32 @@ jobs:
    build-and-test:
      name: Java CI - test
      runs-on: ubuntu-latest
+
+     strategy:
+       matrix:
+        java-version: [1.8, 11, 17, 21]
+
      steps:
        - uses: actions/checkout@v2
+
        - name: Set up Java
          uses: actions/setup-java@v1
          with:
-           java-version: 1.8
+           java-version: ${{ matrix.java-version }}
+
        - name: Inject dummy example config
          working-directory: duo-example
          run: printf "duo.clientId=DIAAAAAAAAAAAAAAAAAA\nduo.clientSecret=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nduo.api.host=example.duosecurity.com\nduo.redirect.uri=http://localhost:8080\nduo.failmode=CLOSED\n" > ./src/main/resources/application.properties
+       
        - name: Build and test with Maven
          run: mvn -B install
+       
        - name: Lint with checkstyle
          run: mvn checkstyle:check
+       
        - name: Verify example starts
          working-directory: duo-example
          run: mvn spring-boot:start
+       
        - name: Verify release profile works
          run: mvn -P release package
