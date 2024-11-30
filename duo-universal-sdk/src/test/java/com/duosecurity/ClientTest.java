@@ -15,8 +15,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
@@ -79,12 +82,12 @@ class ClientTest {
     }
 
     @Test
-    void createAuthUrl_success() throws DuoException {
+    void createAuthUrl_success() throws DuoException, UnsupportedEncodingException {
         String urlString = client.createAuthUrl(USERNAME, STATE);
         try {
             URL authUrl = new URL(urlString);
             assertEquals(authUrl.getHost(), API_HOST);
-            assertTrue(authUrl.getQuery().contains("redirect_uri=" + HTTPS_REDIRECT_URI));
+            assertTrue(authUrl.getQuery().contains("redirect_uri=" + URLEncoder.encode(HTTPS_REDIRECT_URI, StandardCharsets.UTF_8.toString())));
             assertTrue(authUrl.getQuery().contains("client_id=" + CLIENT_ID));
             assertTrue(authUrl.getProtocol().equals("https"));
         } catch (MalformedURLException e) {

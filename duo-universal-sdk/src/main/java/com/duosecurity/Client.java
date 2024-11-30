@@ -10,6 +10,10 @@ import static com.duosecurity.Validator.validateState;
 import static com.duosecurity.Validator.validateUsername;
 import static java.lang.String.format;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.HealthCheckResponse;
@@ -345,9 +349,14 @@ public class Client {
     validateState(state);
     String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri,
             state, username, useDuoCodeAttribute);
-    String query = format(
-            "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
-            redirectUri, clientId, request);
+    String query;
+	try {
+		query = format(
+		        "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
+		        URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.toString()), clientId, request);
+	} catch (UnsupportedEncodingException e) {
+		throw new IllegalStateException("Could not find encoding: " + StandardCharsets.UTF_8.toString());
+	}
     return getAndValidateUrl(apiHost, OAUTH_V_1_AUTHORIZE_ENDPOINT + query).toString();
   }
 
