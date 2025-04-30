@@ -26,10 +26,10 @@ The Duo Universal Client for Java is available from Duo Security on Maven.  Incl
 <dependency>
     <groupId>com.duosecurity</groupId>
     <artifactId>duo-universal-sdk</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
-See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.2.0 for more details.
+See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.3.0 for more details.
 
 ## TLS 1.2 and 1.3 Support
 
