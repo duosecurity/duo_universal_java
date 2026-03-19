@@ -8,7 +8,9 @@ import com.duosecurity.model.TokenResponse;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.concurrent.TimeUnit;
 import okhttp3.CertificatePinner;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -20,6 +22,19 @@ public class DuoConnector {
   protected Retrofit retrofit;
 
   private static final int SUCCESS_STATUS_CODE = 200;
+
+  /**
+   * Maximum number of idle connections to keep in the pool.
+   * 5 is the OkHttp default, and reasonable for our needs.
+   */
+  private static final int MAX_IDLE_CONNECTIONS = 5;
+
+  /**
+   * How long to keep idle connections alive before closing them. The Duo service closes
+   * connections server-side after 1 minute, so we close them slightly earlier to avoid
+   * holding on to a stale connection.
+   */
+  private static final int CONNECTION_KEEP_ALIVE_SECONDS = 55;
 
   /**
    * DuoConnector Constructor.
@@ -47,16 +62,20 @@ public class DuoConnector {
           throws DuoException {
     CertificatePinner duoCertificatePinner = new CertificatePinner.Builder()
             .add(apiHost, caCerts).build();
+    ConnectionPool connectionPool = new ConnectionPool(
+            MAX_IDLE_CONNECTIONS, CONNECTION_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS);
     OkHttpClient client;
     if (proxyHost != null && proxyPort != null) {
       Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
       client = new OkHttpClient.Builder()
               .certificatePinner(duoCertificatePinner)
+              .connectionPool(connectionPool)
               .proxy(proxy)
               .build();
     } else {
       client = new OkHttpClient.Builder()
               .certificatePinner(duoCertificatePinner)
+              .connectionPool(connectionPool)
               .build();
     }
 
