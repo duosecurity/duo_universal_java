@@ -3,6 +3,8 @@ package com.duosecurity.service;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.TokenResponse;
+import okhttp3.CertificatePinner;
+import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,6 +13,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -60,6 +63,43 @@ class DuoConnectorTest {
         } catch (DuoException e) {
             assertEquals("Timeout", e.getMessage());
         }
+    }
+
+    @Test
+    void constructor_with_null_caCerts_disables_pinning() throws Exception {
+        DuoConnector duoConnector = new DuoConnector(API_HOST, null);
+        OkHttpClient client = getOkHttpClient(duoConnector);
+        assertTrue(getPins(client.certificatePinner()).isEmpty());
+    }
+
+    @Test
+    void constructor_with_null_caCerts_and_proxy_disables_pinning() throws Exception {
+        DuoConnector duoConnector = new DuoConnector(API_HOST, "proxy.example.com", 8080, null);
+        OkHttpClient client = getOkHttpClient(duoConnector);
+        assertTrue(getPins(client.certificatePinner()).isEmpty());
+    }
+
+    @Test
+    void constructor_with_caCerts_enables_pinning() throws Exception {
+        DuoConnector duoConnector = new DuoConnector(API_HOST, CA_CERT);
+        OkHttpClient client = getOkHttpClient(duoConnector);
+        assertFalse(getPins(client.certificatePinner()).isEmpty());
+    }
+
+    private OkHttpClient getOkHttpClient(DuoConnector connector) throws Exception {
+        Field retrofitField = DuoConnector.class.getDeclaredField("retrofit");
+        retrofitField.setAccessible(true);
+        Retrofit retrofit = (Retrofit) retrofitField.get(connector);
+        Field clientField = Retrofit.class.getDeclaredField("callFactory");
+        clientField.setAccessible(true);
+        return (OkHttpClient) clientField.get(retrofit);
+    }
+
+    @SuppressWarnings("unchecked")
+    private java.util.Set<?> getPins(CertificatePinner pinner) throws Exception {
+        Field pinsField = CertificatePinner.class.getDeclaredField("pins");
+        pinsField.setAccessible(true);
+        return (java.util.Set<?>) pinsField.get(pinner);
     }
 
     @Test

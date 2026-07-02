@@ -54,27 +54,32 @@ public class DuoConnector {
    * @param apiHost This value is the api host provided by Duo in the admin panel.
    * @param proxyHost This value is the proxy server hostname
    * @param proxyPort This value is the proxy server port
-   * @param caCerts CA Certificates used to connect to Duo
+   * @param caCerts CA Certificates used to connect to Duo, or null to disable pinning
    *
    * @throws DuoException For issues getting and validating the URL
    */
   public DuoConnector(String apiHost, String proxyHost, Integer proxyPort, String[] caCerts)
           throws DuoException {
-    CertificatePinner duoCertificatePinner = new CertificatePinner.Builder()
-            .add(apiHost, caCerts).build();
+    CertificatePinner certificatePinner;
+    if (caCerts != null) {
+      certificatePinner = new CertificatePinner.Builder()
+              .add(apiHost, caCerts).build();
+    } else {
+      certificatePinner = CertificatePinner.DEFAULT;
+    }
     ConnectionPool connectionPool = new ConnectionPool(
             MAX_IDLE_CONNECTIONS, CONNECTION_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS);
     OkHttpClient client;
     if (proxyHost != null && proxyPort != null) {
       Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
       client = new OkHttpClient.Builder()
-              .certificatePinner(duoCertificatePinner)
+              .certificatePinner(certificatePinner)
               .connectionPool(connectionPool)
               .proxy(proxy)
               .build();
     } else {
       client = new OkHttpClient.Builder()
-              .certificatePinner(duoCertificatePinner)
+              .certificatePinner(certificatePinner)
               .connectionPool(connectionPool)
               .build();
     }

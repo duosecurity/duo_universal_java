@@ -237,6 +237,40 @@ class ClientTest {
     }
 
     @Test
+    void disableCaPinning_builds_successfully() throws DuoException {
+        Client client = new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
+                .disableCaPinning()
+                .build();
+        assertNotNull(client);
+    }
+
+    @Test
+    void disableCaPinning_with_custom_certs_throws_exception() {
+        try {
+            new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
+                    .setCACerts(new String[]{"sha256/test"})
+                    .disableCaPinning()
+                    .build();
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertTrue(e.getMessage().contains("Cannot both disable CA pinning and provide custom certificates"));
+        }
+    }
+
+    @Test
+    void disableCaPinning_then_custom_certs_throws_exception() {
+        try {
+            new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
+                    .disableCaPinning()
+                    .setCACerts(new String[]{"sha256/test"})
+                    .build();
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertTrue(e.getMessage().contains("Cannot both disable CA pinning and provide custom certificates"));
+        }
+    }
+
+    @Test
     void legacy_constructors_match() throws DuoException {
         // Create clients using the old deprecated constructors and check that their fields are the same as one created using the builder.
         // This should help prevent adding a new field to the class and forgetting to update the legacy constructors.
