@@ -161,6 +161,7 @@ public class Client {
     private final String redirectUri;
     private Boolean useDuoCodeAttribute;
     private String[] caCerts;
+    private boolean caPinningDisabled;
     private String userAgent;
 
     private static final String[] DEFAULT_CA_CERTS = {
@@ -361,6 +362,11 @@ public class Client {
     public Client build() throws DuoException {
       validateClientParams(clientId, clientSecret, apiHost, redirectUri);
 
+      if (caPinningDisabled && caCerts != DEFAULT_CA_CERTS) {
+        throw new DuoException(
+            "Cannot both disable CA pinning and provide custom certificates");
+      }
+
       Client client = new Client();
       client.clientId = clientId;
       client.clientSecret = clientSecret;
@@ -368,7 +374,8 @@ public class Client {
       client.redirectUri = redirectUri;
       client.useDuoCodeAttribute = useDuoCodeAttribute;
       client.userAgent = userAgent;
-      client.duoConnector = new DuoConnector(apiHost, proxyHost, proxyPort, caCerts);
+      client.duoConnector = new DuoConnector(apiHost, proxyHost, proxyPort,
+              caPinningDisabled ? null : caCerts);
 
       return client;
     }
@@ -377,13 +384,27 @@ public class Client {
      * Optionally use custom CA Certificates when validating connections to Duo.
      *
      * @param userCaCerts List of CA Certificates to use
-     * 
+     *
      * @return the Builder
      */
     public Builder setCACerts(String[] userCaCerts) {
       if (validateCaCert(userCaCerts)) {
         this.caCerts = userCaCerts;
       }
+      return this;
+    }
+
+    /**
+     * Disable certificate pinning for connections to Duo.
+     * When disabled, TLS verification still occurs using the system's default
+     * trusted certificate authorities, but the bundled CA pin set is not enforced.
+     *
+     * <p>This option is mutually exclusive with {@link #setCACerts(String[])}.
+     *
+     * @return the Builder
+     */
+    public Builder disableCaPinning() {
+      this.caPinningDisabled = true;
       return this;
     }
 
