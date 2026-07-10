@@ -147,7 +147,11 @@ class UtilsTest {
     }
 
     @Test
-    void transformDecodedJwtToTokenWithNonStringAmrElements() {
+    void transformDecodedJwtToTokenWithNumericAmrElements() {
+        // Jackson coerces numeric elements to their string form when the target
+        // type is String, so this does not throw and yields ["1", "2"].
+        // The try/catch in extractAmr is defense-in-depth for genuinely
+        // non-coercible element types.
         String jwt = JWT.create()
             .withIssuer("issuer")
             .withSubject("test")
@@ -158,7 +162,7 @@ class UtilsTest {
 
         Token token = assertDoesNotThrow(() -> Utils.transformDecodedJwtToToken(decodedJWT));
 
-        assertNull(token.getAmr());
+        assertEquals(Arrays.asList("1", "2"), token.getAmr());
     }
 
     @Test
