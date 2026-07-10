@@ -76,6 +76,7 @@ public class Utils {
     token.setAuth_time(decodedJwt.getClaim("auth_time").asInt());
     token.setExp(decodedJwt.getClaim("exp").asInt());
     token.setSub(decodedJwt.getClaim("sub").asString());
+    token.setAmr(decodedJwt.getClaim("amr").asList(String.class));
     return token;
   }
 

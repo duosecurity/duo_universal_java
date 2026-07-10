@@ -8,8 +8,11 @@ import com.duosecurity.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +73,7 @@ class UtilsTest {
 
     @Test
     void transformDecodedJwtToToken() {
-        String jwt = createTestJWT();    
+        String jwt = createTestJWT();
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT =  JWT.decode(jwt);
         Token token = Utils.transformDecodedJwtToToken(decodedJWT);
@@ -78,6 +81,39 @@ class UtilsTest {
         assertEquals(token.getIss(), "issuer");
         assertEquals(token.getSub(), "test");
         assertEquals(token.getAud(), "aud");
+        // amr claim is optional; when absent, the field should be null.
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithAmr() {
+        List<String> amr = Arrays.asList("mfa", "otp");
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", amr.toArray(new String[0]))
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertEquals(amr, token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithEmptyAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", new String[0])
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertEquals(Collections.emptyList(), token.getAmr());
     }
 
     @Test
