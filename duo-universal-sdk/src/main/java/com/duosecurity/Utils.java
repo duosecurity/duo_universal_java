@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.AccessDevice;
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class Utils {
@@ -76,7 +79,17 @@ public class Utils {
     token.setAuth_time(decodedJwt.getClaim("auth_time").asInt());
     token.setExp(decodedJwt.getClaim("exp").asInt());
     token.setSub(decodedJwt.getClaim("sub").asString());
+    token.setAmr(extractAmr(decodedJwt.getClaim("amr")));
     return token;
+  }
+
+  private static List<String> extractAmr(Claim amrClaim) {
+    try {
+      return amrClaim.asList(String.class);
+    } catch (JWTDecodeException e) {
+      // Non-string array elements (RFC 8176 violation) — treat as absent.
+      return null;
+    }
   }
 
   static boolean validateCaCert(String[] userCaCerts) {

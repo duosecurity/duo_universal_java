@@ -1,6 +1,7 @@
 package com.duosecurity.model;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 public class Token implements Serializable {
@@ -15,10 +16,12 @@ public class Token implements Serializable {
   private Integer auth_time;
   private AuthResult auth_result;
   private AuthContext auth_context;
+  private List<String> amr;
 
   /**
-   * Constructor with all properties.
-   * 
+   * Constructor for the legacy set of claims. Does not set {@code amr};
+   * use {@link #setAmr(java.util.List)} for that.
+   *
    * @param iss iss
    * @param sub sub
    * @param preferredUsername preferred_username
@@ -121,6 +124,14 @@ public class Token implements Serializable {
     this.auth_context = authContext;
   }
 
+  public List<String> getAmr() {
+    return amr;
+  }
+
+  public void setAmr(List<String> amr) {
+    this.amr = amr;
+  }
+
   @Override
   public String toString() {
     return "Token [iss=" + iss
@@ -132,6 +143,7 @@ public class Token implements Serializable {
           + ", auth_time=" + auth_time
           + ", auth_result=" + auth_result
           + ", auth_context=" + auth_context
+          + ", amr=" + amr
           + ", getAud()=" + getAud()
           + ", getAuth_context()=" + getAuth_context()
           + ", getAuth_result()=" + getAuth_result()
@@ -141,6 +153,7 @@ public class Token implements Serializable {
           + ", getIss()=" + getIss()
           + ", getPreferred_username()=" + getPreferred_username()
           + ", getSub()=" + getSub()
+          + ", getAmr()=" + getAmr()
           + ", hashCode()=" + hashCode()
           + ", getClass()=" + getClass()
           + ", toString()=" + super.toString()
@@ -167,7 +180,8 @@ public class Token implements Serializable {
         && Objects.equals(iat, other.iat)
         && Objects.equals(auth_time, other.auth_time)
         && Objects.equals(auth_result, other.auth_result)
-        && Objects.equals(auth_context, other.auth_context);
+        && Objects.equals(auth_context, other.auth_context)
+        && Objects.equals(amr, other.amr);
   }
 
   @Override
@@ -183,6 +197,7 @@ public class Token implements Serializable {
     result = prime * result + ((auth_time == null) ? 0 : auth_time.hashCode());
     result = prime * result + ((auth_result == null) ? 0 : auth_result.hashCode());
     result = prime * result + ((auth_context == null) ? 0 : auth_context.hashCode());
+    result = prime * result + ((amr == null) ? 0 : amr.hashCode());
     return result;
   }
 }

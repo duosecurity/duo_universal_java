@@ -8,8 +8,11 @@ import com.duosecurity.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +73,7 @@ class UtilsTest {
 
     @Test
     void transformDecodedJwtToToken() {
-        String jwt = createTestJWT();    
+        String jwt = createTestJWT();
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT =  JWT.decode(jwt);
         Token token = Utils.transformDecodedJwtToToken(decodedJWT);
@@ -78,6 +81,104 @@ class UtilsTest {
         assertEquals(token.getIss(), "issuer");
         assertEquals(token.getSub(), "test");
         assertEquals(token.getAud(), "aud");
+        // amr claim is optional; when absent, the field should be null.
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithAmr() {
+        List<String> amr = Arrays.asList("mfa", "otp");
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", amr.toArray(new String[0]))
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertEquals(amr, token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithEmptyAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", new String[0])
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertEquals(Collections.emptyList(), token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithNullAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withNullClaim("amr")
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithNonArrayAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withClaim("amr", "mfa")
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithNumericAmrElements() {
+        // Jackson coerces numeric elements to their string form when the target
+        // type is String, so this does not throw and yields ["1", "2"].
+        // The try/catch in extractAmr is defense-in-depth for genuinely
+        // non-coercible element types.
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", new Integer[]{1, 2})
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = assertDoesNotThrow(() -> Utils.transformDecodedJwtToToken(decodedJWT));
+
+        assertEquals(Arrays.asList("1", "2"), token.getAmr());
+    }
+
+    @Test
+    void tokenEqualityRespectsAmrField() {
+        Token a = new Token();
+        a.setAmr(Arrays.asList("mfa"));
+        Token b = new Token();
+        b.setAmr(Arrays.asList("mfa"));
+        Token c = new Token();
+        c.setAmr(Arrays.asList("otp"));
+        Token d = new Token();
+
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+        assertNotEquals(a, c);
+        assertNotEquals(a, d);
     }
 
     @Test
