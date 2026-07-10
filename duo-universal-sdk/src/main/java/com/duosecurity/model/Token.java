@@ -19,8 +19,9 @@ public class Token implements Serializable {
   private List<String> amr;
 
   /**
-   * Constructor with all properties.
-   * 
+   * Constructor for the legacy set of claims. Does not set {@code amr};
+   * use {@link #setAmr(java.util.List)} for that.
+   *
    * @param iss iss
    * @param sub sub
    * @param preferredUsername preferred_username
@@ -152,6 +153,7 @@ public class Token implements Serializable {
           + ", getIss()=" + getIss()
           + ", getPreferred_username()=" + getPreferred_username()
           + ", getSub()=" + getSub()
+          + ", getAmr()=" + getAmr()
           + ", hashCode()=" + hashCode()
           + ", getClass()=" + getClass()
           + ", toString()=" + super.toString()

@@ -117,6 +117,67 @@ class UtilsTest {
     }
 
     @Test
+    void transformDecodedJwtToTokenWithNullAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withNullClaim("amr")
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithNonArrayAmr() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withClaim("amr", "mfa")
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = Utils.transformDecodedJwtToToken(decodedJWT);
+
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithNonStringAmrElements() {
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withSubject("test")
+            .withAudience("aud")
+            .withArrayClaim("amr", new Integer[]{1, 2})
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+
+        Token token = assertDoesNotThrow(() -> Utils.transformDecodedJwtToToken(decodedJWT));
+
+        assertNull(token.getAmr());
+    }
+
+    @Test
+    void tokenEqualityRespectsAmrField() {
+        Token a = new Token();
+        a.setAmr(Arrays.asList("mfa"));
+        Token b = new Token();
+        b.setAmr(Arrays.asList("mfa"));
+        Token c = new Token();
+        c.setAmr(Arrays.asList("otp"));
+        Token d = new Token();
+
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+        assertNotEquals(a, c);
+        assertNotEquals(a, d);
+    }
+
+    @Test
     void getAndValidateUrl() throws DuoException {
         URL result = Utils.getAndValidateUrl("my_host", "/file");
         assertEquals(result.getHost(), "my_host");
