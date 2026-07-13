@@ -22,14 +22,14 @@ Run `mvn package` to generate a JAR with dependencies, suitable for inclusion in
 
 The Duo Universal Client for Java is available from Duo Security on Maven.  Include the following in your dependency definitions:
 ```
-<!-- https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk -->
+<!-- https://central.sonatype.com/artifact/com.duosecurity/duo-universal-sdk -->
 <dependency>
     <groupId>com.duosecurity</groupId>
     <artifactId>duo-universal-sdk</artifactId>
-    <version>1.3.1</version>
+    <version>1.3.2</version>
 </dependency>
 ```
-See https://mvnrepository.com/artifact/com.duosecurity/duo-universal-sdk/1.3.1 for more details.
+See https://central.sonatype.com/artifact/com.duosecurity/duo-universal-sdk/1.3.2 for more details.
 
 ## TLS 1.2 and 1.3 Support
 
