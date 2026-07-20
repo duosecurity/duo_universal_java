@@ -233,7 +233,60 @@ class ClientTest {
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
         verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
-        assertTrue(sentUserAgent.startsWith("duo_universal_java") && sentUserAgent.endsWith(appendedUserAgent));
+        assertTrue(sentUserAgent.startsWith("duo_universal_java") && sentUserAgent.contains(appendedUserAgent));
+    }
+
+    @Test
+    void userAgent_includes_ca_bundle_version() throws DuoException {
+        Client client = new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI).build();
+        client.duoConnector = Mockito.mock(DuoConnector.class);
+
+        try {
+            client.exchangeAuthorizationCodeFor2FAResult("duo_code", Mockito.mock(TokenValidator.class));
+        } catch (Exception e) {
+            // ignored
+        }
+
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        String sentUserAgent = stringCaptor.getValue();
+        assertTrue(sentUserAgent.contains("ca_bundle/1.0"));
+    }
+
+    @Test
+    void userAgent_includes_ca_pinning_enabled() throws DuoException {
+        Client client = new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI).build();
+        client.duoConnector = Mockito.mock(DuoConnector.class);
+
+        try {
+            client.exchangeAuthorizationCodeFor2FAResult("duo_code", Mockito.mock(TokenValidator.class));
+        } catch (Exception e) {
+            // ignored
+        }
+
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        String sentUserAgent = stringCaptor.getValue();
+        assertTrue(sentUserAgent.contains("(ca_pinning=enabled)"));
+    }
+
+    @Test
+    void userAgent_includes_ca_pinning_disabled() throws DuoException {
+        Client client = new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
+                .disableCaPinning()
+                .build();
+        client.duoConnector = Mockito.mock(DuoConnector.class);
+
+        try {
+            client.exchangeAuthorizationCodeFor2FAResult("duo_code", Mockito.mock(TokenValidator.class));
+        } catch (Exception e) {
+            // ignored
+        }
+
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        String sentUserAgent = stringCaptor.getValue();
+        assertTrue(sentUserAgent.contains("(ca_pinning=disabled)"));
     }
 
     @Test

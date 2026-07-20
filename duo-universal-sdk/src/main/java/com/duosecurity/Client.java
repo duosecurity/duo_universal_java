@@ -40,6 +40,8 @@ public class Client {
 
   private static final String USER_AGENT_VERSION = "1.3.3-SNAPSHOT";
 
+  private static final String CA_BUNDLE_VERSION = "1.0";
+
   // **************************************************
   // Fields
   // **************************************************
@@ -373,7 +375,9 @@ public class Client {
       client.apiHost = apiHost;
       client.redirectUri = redirectUri;
       client.useDuoCodeAttribute = useDuoCodeAttribute;
-      client.userAgent = userAgent;
+      String caPinningStatus = caPinningDisabled ? "disabled" : "enabled";
+      client.userAgent = format("%s ca_bundle/%s (ca_pinning=%s)",
+              userAgent, CA_BUNDLE_VERSION, caPinningStatus);
       client.duoConnector = new DuoConnector(apiHost, proxyHost, proxyPort,
               caPinningDisabled ? null : caCerts);
 
