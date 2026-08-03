@@ -4,7 +4,7 @@
 [![Issues](https://img.shields.io/github/issues/duosecurity/duo_universal_java)](https://github.com/duosecurity/duo_universal_java/issues)
 [![Forks](https://img.shields.io/github/forks/duosecurity/duo_universal_java)](https://github.com/duosecurity/duo_universal_java/network/members)
 [![Stars](https://img.shields.io/github/stars/duosecurity/duo_universal_java)](https://github.com/duosecurity/duo_universal_java/stargazers)
-[![License](https://img.shields.io/badge/License-View%20License-orange)](https://github.com/duosecurity/duo_universal_java/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-View%20License-orange)](https://github.com/duosecurity/duo_universal_java/blob/main/LICENSE)
 
 
 This library allows a web developer to quickly add Duo's interactive, self-service, two-factor authentication to any Java web login form.
@@ -34,6 +34,30 @@ See https://central.sonatype.com/artifact/com.duosecurity/duo-universal-sdk/1.3.
 ## TLS 1.2 and 1.3 Support
 
 Duo_universal_java uses the Java cryptography libraries for TLS operations. Both TLS 1.2 and 1.3 are supported by Java 8 and later versions.
+
+## Verifying releases
+
+Artifacts published to Maven Central are signed with one of Duo's Maven signing keys.
+The public keys are in [`KEYS`](KEYS) in this repository.
+
+```
+curl -O https://raw.githubusercontent.com/duosecurity/duo_universal_java/main/KEYS
+gpg --import KEYS
+gpg --verify duo-universal-sdk-1.3.2.jar.asc duo-universal-sdk-1.3.2.jar
+```
+
+The `.jar.asc` signature files are available alongside each artifact on Maven Central,
+for example <https://repo1.maven.org/maven2/com/duosecurity/duo-universal-sdk/1.3.2/>.
+
+| Versions | Key fingerprint |
+| --- | --- |
+| 1.3.2 and later | `7ED4 A780 3AFC 6DE8 47DF  9A3F 70EE 73F2 1701 2D0E` |
+| 1.0.2 through 1.3.1 | `20FF 0D66 B2D0 202C 1544  7339 7E77 F31E 27A4 AEA2` (expired 2026-01-27) |
+
+A `Good signature` result confirms the artifact was signed with a Duo key. GPG also
+reports the key as untrusted unless you have signed it yourself, and reports the
+retired key as expired; neither affects the validity of signatures made while that
+key was valid.
 
 # Demo
 
