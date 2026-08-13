@@ -36,10 +36,16 @@ class ClientTest {
     private static final String TEST_PEM_CERT;
 
     static {
-        try {
-            TEST_PEM_CERT = new String(
-                ClientTest.class.getClassLoader().getResourceAsStream("ca_certs.pem").readAllBytes(),
-                java.nio.charset.StandardCharsets.UTF_8);
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(
+                    ClientTest.class.getClassLoader().getResourceAsStream("ca_certs.pem"),
+                    java.nio.charset.StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            TEST_PEM_CERT = sb.toString();
         } catch (java.io.IOException e) {
             throw new RuntimeException(e);
         }
