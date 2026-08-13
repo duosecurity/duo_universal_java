@@ -33,6 +33,18 @@ class ClientTest {
     private static final String USERNAME = "username";
     private static final String NONCE = "abcdefghijklmnopqrstuvwxyz789012";
 
+    private static final String TEST_PEM_CERT;
+
+    static {
+        try {
+            TEST_PEM_CERT = new String(
+                ClientTest.class.getClassLoader().getResourceAsStream("ca_certs.pem").readAllBytes(),
+                java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Client client;
 
     @BeforeEach
@@ -417,7 +429,7 @@ class ClientTest {
     void disableCaPinning_with_custom_certs_throws_exception() {
         try {
             new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
-                    .setCACerts(new String[]{"sha256/test"})
+                    .setCACerts(new String[]{TEST_PEM_CERT})
                     .disableCaPinning()
                     .build();
             Assertions.fail();
@@ -431,7 +443,7 @@ class ClientTest {
         try {
             new Client.Builder(CLIENT_ID, CLIENT_SECRET, API_HOST, HTTPS_REDIRECT_URI)
                     .disableCaPinning()
-                    .setCACerts(new String[]{"sha256/test"})
+                    .setCACerts(new String[]{TEST_PEM_CERT})
                     .build();
             Assertions.fail();
         } catch (DuoException e) {
