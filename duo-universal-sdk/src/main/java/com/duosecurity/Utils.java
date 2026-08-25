@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class Utils {
 
-  private static final int ONE_HOUR_IN_MILLISECONDS = 3600000;
+  private static final int FIVE_MINUTES_IN_MILLISECONDS = 300000;
 
   private static final String HTTPS = "https";
 
@@ -34,7 +34,7 @@ public class Utils {
 
   static String createJwt(String clientId, String clientSecret, String aud) {
     Date expiration = new Date();
-    expiration.setTime(expiration.getTime() + ONE_HOUR_IN_MILLISECONDS);
+    expiration.setTime(expiration.getTime() + FIVE_MINUTES_IN_MILLISECONDS);
     return JWT.create()
               .withHeader(HEADERS)
               .withIssuer(clientId)
@@ -49,7 +49,7 @@ public class Utils {
                                     String state, String username,
                                     Boolean useDuoCodeAttribute) {
     Date expiration = new Date();
-    expiration.setTime(expiration.getTime() + ONE_HOUR_IN_MILLISECONDS);
+    expiration.setTime(expiration.getTime() + FIVE_MINUTES_IN_MILLISECONDS);
     return JWT.create()
               .withHeader(HEADERS)
               .withExpiresAt(expiration)
