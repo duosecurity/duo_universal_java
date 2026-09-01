@@ -6,6 +6,7 @@ import static com.duosecurity.Utils.getAndValidateUrl;
 import static com.duosecurity.Utils.transformDecodedJwtToToken;
 import static com.duosecurity.Utils.validateCaCert;
 import static com.duosecurity.Validator.validateClientParams;
+import static com.duosecurity.Validator.validateNonce;
 import static com.duosecurity.Validator.validateState;
 import static com.duosecurity.Validator.validateUsername;
 import static java.lang.String.format;
@@ -16,6 +17,9 @@ import com.duosecurity.model.HealthCheckResponse;
 import com.duosecurity.model.Token;
 import com.duosecurity.model.TokenResponse;
 import com.duosecurity.service.DuoConnector;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -485,13 +489,38 @@ public class Client {
    * @throws DuoException For problems creating the auth url
    */
   public String createAuthUrl(String username, String state) throws DuoException {
+    return createAuthUrl(username, state, null);
+  }
+
+  /**
+   * Constructs a string which can be used to redirect the client browser to Duo for 2FA,
+   * additionally binding the resulting ID token to this authorization request with a nonce.
+   *
+   * @param username The user to be authenticated by Duo.
+   * @param state A randomly generated String with at least 22 characters
+   *              This value will be returned to the integration post 2FA
+   *              and should be validated. {@link #generateState} exists as a utility function to
+   *              generate this param.
+   * @param nonce A randomly generated String of 16 to 1024 characters, or null for no nonce.
+   *              The same value must be passed to
+   *              {@link #exchangeAuthorizationCodeFor2FAResult(String, String, String)}, which
+   *              will reject an ID token that does not carry it.
+   * @return String
+   *
+   * @throws DuoException For problems creating the auth url
+   */
+  public String createAuthUrl(String username, String state, String nonce) throws DuoException {
     validateUsername(username);
     validateState(state);
+    validateNonce(nonce);
     String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri,
-            state, username, useDuoCodeAttribute);
+            state, username, useDuoCodeAttribute, apiHost);
     String query = format(
             "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
             redirectUri, clientId, request);
+    if (nonce != null) {
+      query = format("%s&nonce=%s", query, urlEncode(nonce));
+    }
     return getAndValidateUrl(apiHost, OAUTH_V_1_AUTHORIZE_ENDPOINT + query).toString();
   }
 
@@ -514,7 +543,32 @@ public class Client {
    */
   public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, String username)
       throws DuoException {
-    TokenValidator validator = new DuoIdTokenValidator(clientSecret, username, clientId, apiHost);
+    return exchangeAuthorizationCodeFor2FAResult(duoCode, username, null);
+  }
+
+  /**
+   * Verifies the duoCode returned by Duo and exchanges it for a {@link Token} which contains
+   * information pertaining to the auth.  Uses the default token validator defined in
+   * DuoIdTokenValidator, which additionally requires the ID Token to carry the given nonce.
+   *
+   * @param duoCode This string is an identifier for the auth and should be exchanged with Duo for a
+   *             token to determine if the auth was successful as well as obtain meta-data about
+   *             about the auth.
+   *
+   * @param username The user to be authenticated by Duo
+   *
+   * @param nonce The same nonce passed to {@link #createAuthUrl(String, String, String)}, or null
+   *              if no nonce was sent.  A non-null value that does not match the nonce claim in
+   *              the ID Token will fail validation.
+   *
+   * @return {@link Token}
+   *
+   * @throws DuoException For errors exchanging duoCode for 2FA results
+   */
+  public Token exchangeAuthorizationCodeFor2FAResult(String duoCode, String username, String nonce)
+      throws DuoException {
+    TokenValidator validator = new DuoIdTokenValidator(clientSecret, username, clientId, apiHost,
+            nonce);
     return exchangeAuthorizationCodeFor2FAResult(duoCode, validator);
   }
 
@@ -548,10 +602,18 @@ public class Client {
     String aud = getAndValidateUrl(apiHost, OAUTH_V_1_TOKEN_ENDPOINT).toString();
     TokenResponse response = duoConnector.exchangeAuthorizationCodeFor2FAResult(userAgent,
             "authorization_code", duoCode, redirectUri, CLIENT_ASSERTION_TYPE,
-            createJwt(clientId, clientSecret, aud));
+            createJwt(clientId, clientSecret, aud), clientId);
     String idToken = response.getId_token();
     DecodedJWT decodedJwt = validator.validateAndDecode(idToken);
     return transformDecodedJwtToToken(decodedJwt);
+  }
+
+  private static String urlEncode(String value) throws DuoException {
+    try {
+      return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      throw new DuoException(e.getMessage(), e);
+    }
   }
 
   /**

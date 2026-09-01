@@ -31,6 +31,7 @@ class ClientTest {
     private static final String HTTPS_REDIRECT_URI = "https://redirect-uri.com";
     private static final String STATE = "abcdefghijklmnopqrstuvwxyz123456";
     private static final String USERNAME = "username";
+    private static final String NONCE = "abcdefghijklmnopqrstuvwxyz789012";
 
     private Client client;
 
@@ -90,6 +91,65 @@ class ClientTest {
         } catch (MalformedURLException e) {
             Assertions.fail();
         }
+    }
+
+    @Test
+    void createAuthUrl_includes_nonce_in_query() throws DuoException {
+        String urlString = client.createAuthUrl(USERNAME, STATE, NONCE);
+        HttpUrl url = HttpUrl.parse(urlString);
+        assertEquals(NONCE, url.queryParameter("nonce"));
+    }
+
+    @Test
+    void createAuthUrl_omits_nonce_when_not_supplied() throws DuoException {
+        String urlString = client.createAuthUrl(USERNAME, STATE);
+        HttpUrl url = HttpUrl.parse(urlString);
+        assertNull(url.queryParameter("nonce"));
+    }
+
+    @Test
+    void createAuthUrl_encodes_nonce() throws DuoException {
+        // A nonce is caller supplied, so reserved characters in it must not be able to
+        // introduce additional query parameters.
+        String urlString = client.createAuthUrl(USERNAME, STATE, "nonce&redirect_uri=evil");
+        HttpUrl url = HttpUrl.parse(urlString);
+        assertEquals("nonce&redirect_uri=evil", url.queryParameter("nonce"));
+        assertEquals(HTTPS_REDIRECT_URI, url.queryParameter("redirect_uri"));
+    }
+
+    @Test
+    void createAuthUrl_throws_exception_for_short_nonce() {
+        try {
+            client.createAuthUrl(USERNAME, STATE, "123456789012345");
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertEquals("Invalid nonce", e.getMessage());
+        }
+    }
+
+    @Test
+    void createAuthUrl_throws_exception_for_long_nonce() {
+        try {
+            client.createAuthUrl(USERNAME, STATE, repeat("a", 1025));
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertEquals("Invalid nonce", e.getMessage());
+        }
+    }
+
+    @Test
+    void createAuthUrl_accepts_nonce_at_length_boundaries() throws DuoException {
+        // Duo documents the nonce as 16-1024 characters, inclusive on both ends.
+        assertNotNull(client.createAuthUrl(USERNAME, STATE, repeat("a", 16)));
+        assertNotNull(client.createAuthUrl(USERNAME, STATE, repeat("a", 1024)));
+    }
+
+    private static String repeat(String s, int times) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            sb.append(s);
+        }
+        return sb.toString();
     }
 
     @Test
@@ -163,7 +223,7 @@ class ClientTest {
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setId_token("eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.qKLZNpctaGsuqLr6KkPiM7_9jG5sEEaLPLakrA1kjk7z0lF3HX_RTRS3c4wVFWMEV_jGg72KIjlBpsWrqMxSNg");
         Mockito.when(client.duoConnector.exchangeAuthorizationCodeFor2FAResult(
-                anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(tokenResponse);
+                anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(tokenResponse);
 
         TokenValidator stubValidator = new TokenValidator() {
             @Override
@@ -174,6 +234,62 @@ class ClientTest {
 
         Token result = client.exchangeAuthorizationCodeFor2FAResult("duo_code", stubValidator);
         assertEquals(result.getSub(), "1234567890");
+    }
+
+    @Test
+    void exchangeAuthorizationCodeFor2FAResult_sends_client_id() throws DuoException {
+        try {
+            client.exchangeAuthorizationCodeFor2FAResult("duo_code", Mockito.mock(TokenValidator.class));
+        } catch (Exception e) {
+            // The call fails due to the incomplete mocking, but we only care about the
+            // arguments passed to the connector, so this is fine and can be ignored.
+        }
+
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(anyString(), anyString(),
+                anyString(), anyString(), anyString(), anyString(), stringCaptor.capture());
+        assertEquals(CLIENT_ID, stringCaptor.getValue());
+    }
+
+    @Test
+    void exchangeAuthorizationCodeFor2FAResult_rejects_mismatched_nonce() throws DuoException {
+        stubIdToken(createIdToken(NONCE));
+
+        try {
+            client.exchangeAuthorizationCodeFor2FAResult("duo_code", USERNAME, "a_different_nonce");
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertTrue(e.getMessage().contains("ID Token verification failed"));
+        }
+    }
+
+    @Test
+    void exchangeAuthorizationCodeFor2FAResult_accepts_matching_nonce() throws DuoException {
+        stubIdToken(createIdToken(NONCE));
+
+        Token result = client.exchangeAuthorizationCodeFor2FAResult("duo_code", USERNAME, NONCE);
+
+        assertEquals(NONCE, result.getNonce());
+    }
+
+    private void stubIdToken(String idToken) throws DuoException {
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setId_token(idToken);
+        Mockito.when(client.duoConnector.exchangeAuthorizationCodeFor2FAResult(
+                anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+                anyString())).thenReturn(tokenResponse);
+    }
+
+    private String createIdToken(String nonce) {
+        return JWT.create()
+                .withIssuer("https://" + API_HOST + "/oauth/v1/token")
+                .withSubject("duo_subject")
+                .withAudience(CLIENT_ID)
+                .withIssuedAt(new java.util.Date())
+                .withExpiresAt(new java.util.Date())
+                .withClaim("preferred_username", USERNAME)
+                .withClaim("nonce", nonce)
+                .sign(com.auth0.jwt.algorithms.Algorithm.HMAC512(CLIENT_SECRET));
     }
 
     @Test
@@ -231,7 +347,7 @@ class ClientTest {
         }
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
         assertTrue(sentUserAgent.startsWith("duo_universal_java") && sentUserAgent.contains(appendedUserAgent));
     }
@@ -248,7 +364,7 @@ class ClientTest {
         }
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
         assertTrue(sentUserAgent.contains("ca_bundle/1.0"));
     }
@@ -265,7 +381,7 @@ class ClientTest {
         }
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
         assertTrue(sentUserAgent.contains("(ca_pinning=enabled)"));
     }
@@ -284,7 +400,7 @@ class ClientTest {
         }
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
-        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(client.duoConnector).exchangeAuthorizationCodeFor2FAResult(stringCaptor.capture(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
         String sentUserAgent = stringCaptor.getValue();
         assertTrue(sentUserAgent.contains("(ca_pinning=disabled)"));
     }

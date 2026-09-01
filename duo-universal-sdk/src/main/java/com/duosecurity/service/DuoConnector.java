@@ -123,6 +123,7 @@ public class DuoConnector {
    * @param clientAssertionType The type of client assertion used
    * @param clientAssertion     JWT that holds information to verify that the owner of the duoCode
    *                            is authorized to have it
+   * @param clientId            The client id provided by Duo in the admin panel
    *
    * @return TokenResponse  Returns resulting response containing the JWT
    *
@@ -132,11 +133,13 @@ public class DuoConnector {
   public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
                                                              String duoCode, String redirectUri,
                                                              String clientAssertionType,
-                                                             String clientAssertion)
+                                                             String clientAssertion,
+                                                             String clientId)
           throws DuoException {
     DuoService service = retrofit.create(DuoService.class);
     Call<TokenResponse> callSync = service.exchangeAuthorizationCodeFor2FAResult(userAgent,
-                            grantType, duoCode, redirectUri, clientAssertionType, clientAssertion);
+                            grantType, duoCode, redirectUri, clientAssertionType, clientAssertion,
+                            clientId);
     try {
       Response<TokenResponse> response = callSync.execute();
       if (response.code() != SUCCESS_STATUS_CODE || response.body() == null) {

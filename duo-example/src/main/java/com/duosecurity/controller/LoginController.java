@@ -35,7 +35,18 @@ public class LoginController {
   @Value("${duo.failmode}")
   private String failmode;
 
-  private Map<String, String> stateMap;
+  private Map<String, Session> stateMap;
+
+  /** The per-login values that have to survive the redirect to Duo and back. */
+  private static final class Session {
+    private final String username;
+    private final String nonce;
+
+    Session(String username, String nonce) {
+      this.username = username;
+      this.nonce = nonce;
+    }
+  }
 
   private Client duoClient;
 
@@ -100,13 +111,16 @@ public class LoginController {
       }
     }
 
-    // Step 3: Generate and save a state variable
+    // Step 3: Generate and save a state variable, plus an optional nonce.  The nonce binds the
+    // ID Token that Duo returns to this specific authorization request; generateState produces a
+    // random value suitable for either.
     String state = duoClient.generateState();
-    // Store the state to remember the session and username
-    stateMap.put(state, username);
+    String nonce = duoClient.generateState();
+    // Store the state to remember the session, username and nonce
+    stateMap.put(state, new Session(username, nonce));
 
     // Step 4: Create the authUrl and redirect to it
-    String authUrl = duoClient.createAuthUrl(username, state);
+    String authUrl = duoClient.createAuthUrl(username, state, nonce);
     ModelAndView model = new ModelAndView("/redirect");
     model.addObject("authURL", authUrl);
     return model;
@@ -131,10 +145,12 @@ public class LoginController {
       return model;
     }
     // Remove state from the list of valid sessions
-    String username = stateMap.remove(state);
+    Session session = stateMap.remove(state);
 
-    // Step 6: Exchange the auth duoCode for a Token object
-    Token token = duoClient.exchangeAuthorizationCodeFor2FAResult(duoCode, username);
+    // Step 6: Exchange the auth duoCode for a Token object.  Passing the nonce sent in step 4
+    // makes the SDK reject an ID Token that does not carry it.
+    Token token = duoClient.exchangeAuthorizationCodeFor2FAResult(duoCode, session.username,
+            session.nonce);
 
     // If the auth was successful, render the welcome page otherwise return an error
     if (authWasSuccessful(token)) {

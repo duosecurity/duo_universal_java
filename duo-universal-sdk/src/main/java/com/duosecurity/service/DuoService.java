@@ -22,6 +22,7 @@ interface DuoService {
                                     @Field("code") String duoCode,
                                     @Field("redirect_uri") String redirectUri,
                                     @Field("client_assertion_type") String clientAssertionType,
-                                    @Field("client_assertion") String clientAssertion);
+                                    @Field("client_assertion") String clientAssertion,
+                                    @Field("client_id") String clientId);
 
 }

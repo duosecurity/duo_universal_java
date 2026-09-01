@@ -113,11 +113,11 @@ class DuoConnectorTest {
         tokenResponse.setId_token("token");
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
         when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                "client_assertion_type", "client_assertion")).thenReturn(callSync);
+                "client_assertion_type", "client_assertion", "client_id")).thenReturn(callSync);
         when(callSync.execute()).thenReturn(Response.success(tokenResponse));
 
         TokenResponse result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                "client_assertion_type", "client_assertion");
+                "client_assertion_type", "client_assertion", "client_id");
         assertEquals("token", result.getId_token());
     }
 
@@ -132,13 +132,13 @@ class DuoConnectorTest {
         tokenResponse.setId_token("token");
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
         when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                "client_assertion_type", "client_assertion")).thenReturn(callSync);
+                "client_assertion_type", "client_assertion", "client_id")).thenReturn(callSync);
         when(callSync.execute()).thenThrow(new IOException("Timeout"));
 
         TokenResponse result = null;
         try {
             result = duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                    "client_assertion_type", "client_assertion");
+                    "client_assertion_type", "client_assertion", "client_id");
             Assertions.fail();
         } catch (DuoException e) {
             assertEquals("Timeout", e.getMessage());
@@ -154,7 +154,7 @@ class DuoConnectorTest {
         Call<TokenResponse> callSync = Mockito.mock(Call.class);
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
         when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                "client_assertion_type", "client_assertion")).thenReturn(callSync);
+                "client_assertion_type", "client_assertion", "client_id")).thenReturn(callSync);
 
         // Create a 400 response (body doesn't matter)
         okhttp3.ResponseBody body = okhttp3.ResponseBody.create(null, "");
@@ -162,7 +162,7 @@ class DuoConnectorTest {
 
         try {
             duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                    "client_assertion_type", "client_assertion");
+                    "client_assertion_type", "client_assertion", "client_id");
             Assertions.fail();
         } catch (DuoException e) {
             assertEquals("msg=Response.error(), msg_detail=", e.getMessage());
@@ -178,14 +178,14 @@ class DuoConnectorTest {
         Call<TokenResponse> callSync = Mockito.mock(Call.class);
         when(retrofit.create(DuoService.class)).thenReturn(duoService);
         when(duoService.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                "client_assertion_type", "client_assertion")).thenReturn(callSync);
+                "client_assertion_type", "client_assertion", "client_id")).thenReturn(callSync);
 
         // Create a successful (200) response with a null body
         when(callSync.execute()).thenReturn(Response.success(200, null));
 
         try {
             duoConnector.exchangeAuthorizationCodeFor2FAResult("user-agent", "grant_type", "duo_code", "redirect_uri",
-                    "client_assertion_type", "client_assertion");
+                    "client_assertion_type", "client_assertion", "client_id");
             Assertions.fail();
         } catch (DuoException e) {
             // Response.success() is the error message because that's the default message when manually crafting
