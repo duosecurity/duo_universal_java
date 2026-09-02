@@ -508,22 +508,53 @@ public class Client {
    * @return String
    *
    * @throws DuoException For problems creating the auth url
+   *
+   * @see #createAuthUrl(AuthUrlOptions) to additionally send dest_app_name, dest_app_id or
+   *      display_username
    */
   public String createAuthUrl(String username, String state, String nonce) throws DuoException {
-    validateUsername(username);
-    validateState(state);
-    validateNonce(nonce);
+    return createAuthUrl(new AuthUrlOptions.Builder(username, state).setNonce(nonce).build());
+  }
+
+
+  /**
+   * Constructs a string which can be used to redirect the client browser to Duo for 2FA.
+   *
+   * <p>This is the full form of {@code createAuthUrl}, and the only one that can send the
+   * optional {@code dest_app_name}, {@code dest_app_id} and {@code display_username} values.
+   * For example:
+   *
+   * <pre>
+   * client.createAuthUrl(new AuthUrlOptions.Builder(username, state)
+   *         .setNonce(nonce)
+   *         .setDestAppName("Acme VPN")
+   *         .build());
+   * </pre>
+   *
+   * @param options The values describing this authorization request, built with
+   *                {@link AuthUrlOptions.Builder}.
+   *
+   * @return String
+   *
+   * @throws DuoException For problems creating the auth url, or if options is null
+   */
+  public String createAuthUrl(AuthUrlOptions options) throws DuoException {
+    if (options == null) {
+      throw new DuoException("Missing options");
+    }
+    validateUsername(options.getUsername());
+    validateState(options.getState());
+    validateNonce(options.getNonce());
     String request = createJwtForAuthUrl(clientId, clientSecret, redirectUri,
-            state, username, useDuoCodeAttribute, apiHost);
+            useDuoCodeAttribute, apiHost, options);
     String query = format(
             "?scope=openid&response_type=code&redirect_uri=%s&client_id=%s&request=%s",
             redirectUri, clientId, request);
-    if (nonce != null) {
-      query = format("%s&nonce=%s", query, urlEncode(nonce));
+    if (options.getNonce() != null) {
+      query = format("%s&nonce=%s", query, urlEncode(options.getNonce()));
     }
     return getAndValidateUrl(apiHost, OAUTH_V_1_AUTHORIZE_ENDPOINT + query).toString();
   }
-
 
   /**
    * Verifies the duoCode returned by Duo and exchanges it for a {@link Token} which contains

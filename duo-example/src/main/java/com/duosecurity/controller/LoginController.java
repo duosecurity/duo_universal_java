@@ -1,6 +1,7 @@
 package com.duosecurity.controller;
 
 
+import com.duosecurity.AuthUrlOptions;
 import com.duosecurity.Client;
 import com.duosecurity.exception.DuoException;
 import com.duosecurity.model.Token;
@@ -120,7 +121,23 @@ public class LoginController {
     stateMap.put(state, new Session(username, nonce));
 
     // Step 4: Create the authUrl and redirect to it
-    String authUrl = duoClient.createAuthUrl(username, state, nonce);
+    String authUrl = duoClient.createAuthUrl(
+            new AuthUrlOptions.Builder(username, state)
+                    .setNonce(nonce)
+                    .build());
+
+    /* Example of setting the optional destination application and display fields
+    String authUrl = duoClient.createAuthUrl(
+            new AuthUrlOptions.Builder(username, state)
+                    .setNonce(nonce)
+                    // Shown in Duo Mobile and recorded in the authentication log
+                    .setDestAppName("Acme VPN")
+                    // A long-lived identifier for that application; not shown to users
+                    .setDestAppId("vpn-prod-1")
+                    // Shown in Duo Mobile's "user" field for Push, in place of the Duo username
+                    .setDisplayUsername("a.smith@acme.com")
+                    .build());
+    */
     ModelAndView model = new ModelAndView("/redirect");
     model.addObject("authURL", authUrl);
     return model;
