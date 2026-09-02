@@ -62,13 +62,23 @@ class UtilsTest {
 
     @Test
     void createJWTForAuthURL() throws DuoException {
-        String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username", true);
+        String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username", true, "api-host.com");
         // Just testing the transform logic so a simple decode is sufficient
         DecodedJWT decodedJWT = JWT.decode(jwt);
         assertEquals(decodedJWT.getClaim("client_id").asString(), "my_client_id");
         assertEquals(decodedJWT.getClaim("redirect_uri").asString(), "my_redirect_uri");
         assertEquals(decodedJWT.getClaim("state").asString(), "my_state");
         assertEquals(decodedJWT.getClaim("duo_uname").asString(), "my_username");
+    }
+
+    @Test
+    void createJWTForAuthURL_includes_iss_and_aud() throws DuoException {
+        String jwt = Utils.createJwtForAuthUrl("my_client_id", CLIENT_SECRET, "my_redirect_uri", "my_state", "my_username", true, "api-host.com");
+        DecodedJWT decodedJWT = JWT.decode(jwt);
+        // Both are optional per Duo's OIDC docs, but every other Duo SDK sends them:
+        // iss must equal the client_id and aud must equal https://{api_host}.
+        assertEquals("my_client_id", decodedJWT.getClaim("iss").asString());
+        assertEquals("https://api-host.com", decodedJWT.getClaim("aud").asString());
     }
 
     @Test

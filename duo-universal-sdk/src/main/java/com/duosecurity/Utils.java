@@ -47,12 +47,14 @@ public class Utils {
 
   static String createJwtForAuthUrl(String clientId, String clientSecret, String redirectUri,
                                     String state, String username,
-                                    Boolean useDuoCodeAttribute) {
+                                    Boolean useDuoCodeAttribute, String apiHost) {
     Date expiration = new Date();
     expiration.setTime(expiration.getTime() + FIVE_MINUTES_IN_MILLISECONDS);
     return JWT.create()
               .withHeader(HEADERS)
               .withExpiresAt(expiration)
+              .withIssuer(clientId)
+              .withAudience(format("%s://%s", HTTPS, apiHost))
               .withClaim("scope", "openid")
               .withClaim("client_id", clientId)
               .withClaim("redirect_uri", redirectUri)
@@ -80,6 +82,7 @@ public class Utils {
     token.setExp(decodedJwt.getClaim("exp").asInt());
     token.setSub(decodedJwt.getClaim("sub").asString());
     token.setAmr(extractAmr(decodedJwt.getClaim("amr")));
+    token.setNonce(decodedJwt.getClaim("nonce").asString());
     return token;
   }
 
