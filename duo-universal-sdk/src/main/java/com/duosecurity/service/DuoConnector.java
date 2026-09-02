@@ -114,6 +114,36 @@ public class DuoConnector {
   }
 
   /**
+   * Send request to exchange duoCode for an encoded JWT, without a client_id form field.
+   *
+   * <p>Prefer
+   * {@link #exchangeAuthorizationCodeFor2FAResult(String, String, String, String, String, String,
+   * String)}, which sends the client_id that Duo's token endpoint expects. This overload is
+   * retained for backwards compatibility.
+   *
+   * @param userAgent           A user agent string
+   * @param grantType           A string that tells what type of exchange that will occur
+   * @param duoCode             An authentication session transaction id
+   * @param redirectUri         The URL to redirect back to after a successful auth
+   * @param clientAssertionType The type of client assertion used
+   * @param clientAssertion     JWT that holds information to verify that the owner of the duoCode
+   *                            is authorized to have it
+   *
+   * @return TokenResponse  Returns resulting response containing the JWT
+   *
+   * @throws DuoException   For issues sending or receiving the request,
+                            or failing to exchange a token
+   */
+  public TokenResponse exchangeAuthorizationCodeFor2FAResult(String userAgent, String grantType,
+                                                             String duoCode, String redirectUri,
+                                                             String clientAssertionType,
+                                                             String clientAssertion)
+          throws DuoException {
+    return exchangeAuthorizationCodeFor2FAResult(userAgent, grantType, duoCode, redirectUri,
+            clientAssertionType, clientAssertion, null);
+  }
+
+  /**
    * Send request to exchange duoCode for an encoded JWT.
    *
    * @param userAgent           A user agent string
