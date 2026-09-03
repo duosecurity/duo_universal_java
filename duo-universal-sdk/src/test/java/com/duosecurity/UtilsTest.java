@@ -84,6 +84,45 @@ class UtilsTest {
     }
 
     @Test
+    void transformDecodedJwtToTokenWithApplicationDestinationName() {
+        // Duo echoes the dest_app_name sent on the authorize request back as
+        // auth_context.application.destination_name.
+        Map<String, Object> application = new HashMap<>();
+        application.put("key", "DIXXXXXXXXXXXXXXXXXX");
+        application.put("name", "Acme Corp");
+        application.put("destination_name", "Acme Intranet");
+        Map<String, Object> authContext = new HashMap<>();
+        authContext.put("application", application);
+
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withClaim("auth_context", authContext)
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        Token token = Utils.transformDecodedJwtToToken(JWT.decode(jwt));
+
+        Application result = token.getAuth_context().getApplication();
+        assertEquals("Acme Intranet", result.getDestination_name());
+        assertEquals("Acme Corp", result.getName());
+        assertEquals("DIXXXXXXXXXXXXXXXXXX", result.getKey());
+    }
+
+    @Test
+    void transformDecodedJwtToTokenWithoutApplicationDestinationName() {
+        Map<String, Object> application = new HashMap<>();
+        application.put("name", "Acme Corp");
+        Map<String, Object> authContext = new HashMap<>();
+        authContext.put("application", application);
+
+        String jwt = JWT.create()
+            .withIssuer("issuer")
+            .withClaim("auth_context", authContext)
+            .sign(Algorithm.HMAC512(CLIENT_SECRET));
+        Token token = Utils.transformDecodedJwtToToken(JWT.decode(jwt));
+
+        assertNull(token.getAuth_context().getApplication().getDestination_name());
+    }
+
+    @Test
     void transformDecodedJwtToToken() {
         String jwt = createTestJWT();
         // Just testing the transform logic so a simple decode is sufficient

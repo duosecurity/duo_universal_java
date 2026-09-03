@@ -221,6 +221,9 @@ public class Utils {
       application.setName(applicationMap.containsKey("name")
                           && applicationMap.get("name") != null
                           ? applicationMap.get("name").toString() : null);
+      application.setDestination_name(applicationMap.containsKey("destination_name")
+                          && applicationMap.get("destination_name") != null
+                          ? applicationMap.get("destination_name").toString() : null);
     }
     return application;
   }

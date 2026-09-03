@@ -8,10 +8,12 @@ public class Application implements Serializable {
 
   private String key;
   private String name;
+  private String destination_name;
 
   /**
-   * Constructor with all properties.
-   * 
+   * Constructor for the legacy set of properties. Does not set {@code destination_name};
+   * use {@link #setDestination_name(String)} for that.
+   *
    * @param key key
    * @param name  name
    */
@@ -43,12 +45,22 @@ public class Application implements Serializable {
     this.name = name;
   }
 
+  public String getDestination_name() {
+    return destination_name;
+  }
+
+  public void setDestination_name(String destinationName) {
+    this.destination_name = destinationName;
+  }
+
   @Override
   public String toString() {
     return "Application [key=" + key
         + ", name=" + name
+        + ", destination_name=" + destination_name
         + ", getKey()=" + getKey()
         + ", getName()=" + getName()
+        + ", getDestination_name()=" + getDestination_name()
         + ", hashCode()=" + hashCode()
         + ", getClass()=" + getClass()
         + ", toString()=" + super.toString()
@@ -65,7 +77,8 @@ public class Application implements Serializable {
     }
     Application other = (Application) obj;
     return Objects.equals(key, other.key)
-        && Objects.equals(name, other.name);
+        && Objects.equals(name, other.name)
+        && Objects.equals(destination_name, other.destination_name);
   }
 
   @Override
@@ -74,6 +87,7 @@ public class Application implements Serializable {
     int result = 1;
     result = prime * result + ((key == null) ? 0 : key.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((destination_name == null) ? 0 : destination_name.hashCode());
     return result;
   }
 }
