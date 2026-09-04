@@ -126,7 +126,7 @@ public class LoginController {
                     .setNonce(nonce)
                     .build());
 
-    /* Example of setting the optional destination application and display fields
+    /* Example of setting the optional destination application, display and freshness fields
     String authUrl = duoClient.createAuthUrl(
             new AuthUrlOptions.Builder(username, state)
                     .setNonce(nonce)
@@ -136,6 +136,10 @@ public class LoginController {
                     .setDestAppId("vpn-prod-1")
                     // Shown in Duo Mobile's "user" field for Push, in place of the Duo username
                     .setDisplayUsername("a.smith@acme.com")
+                    // Reauthenticate interactively if the remembered session is older than this
+                    .setMaxAge(3600)
+                    // Or force interactive reauthentication regardless of remembered session
+                    .setPrompt(AuthUrlOptions.PROMPT_LOGIN)
                     .build());
     */
     ModelAndView model = new ModelAndView("/redirect");

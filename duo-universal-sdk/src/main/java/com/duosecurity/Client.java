@@ -509,8 +509,8 @@ public class Client {
    *
    * @throws DuoException For problems creating the auth url
    *
-   * @see #createAuthUrl(AuthUrlOptions) to additionally send dest_app_name, dest_app_id or
-   *      display_username
+   * @see #createAuthUrl(AuthUrlOptions) to additionally send dest_app_name, dest_app_id,
+   *      display_username, max_age or prompt
    */
   public String createAuthUrl(String username, String state, String nonce) throws DuoException {
     return createAuthUrl(new AuthUrlOptions.Builder(username, state).setNonce(nonce).build());
@@ -521,8 +521,8 @@ public class Client {
    * Constructs a string which can be used to redirect the client browser to Duo for 2FA.
    *
    * <p>This is the full form of {@code createAuthUrl}, and the only one that can send the
-   * optional {@code dest_app_name}, {@code dest_app_id} and {@code display_username} values.
-   * For example:
+   * optional {@code dest_app_name}, {@code dest_app_id}, {@code display_username},
+   * {@code max_age} and {@code prompt} values. For example:
    *
    * <pre>
    * client.createAuthUrl(new AuthUrlOptions.Builder(username, state)

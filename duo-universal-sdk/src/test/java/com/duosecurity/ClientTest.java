@@ -190,6 +190,32 @@ class ClientTest {
     }
 
     @Test
+    void createAuthUrl_sends_max_age() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setMaxAge(300).build());
+
+        assertEquals(300, decodeRequestJwt(urlString).getClaim("max_age").asInt());
+    }
+
+    @Test
+    void createAuthUrl_sends_max_age_of_zero() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setMaxAge(0).build());
+
+        // Zero is a meaningful value to Duo -- it forces interactive reauthentication -- so it
+        // must be sent rather than treated as "unset".
+        assertEquals(0, decodeRequestJwt(urlString).getClaim("max_age").asInt());
+    }
+
+    @Test
+    void createAuthUrl_sends_prompt() throws DuoException {
+        String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE)
+                .setPrompt(AuthUrlOptions.PROMPT_LOGIN).build());
+
+        assertEquals("login", decodeRequestJwt(urlString).getClaim("prompt").asString());
+    }
+
+    @Test
     void createAuthUrl_omits_optional_claims_that_were_not_set() throws DuoException {
         String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE).build());
 
@@ -199,6 +225,8 @@ class ClientTest {
         assertTrue(jwt.getClaim("dest_app_name").isMissing());
         assertTrue(jwt.getClaim("dest_app_id").isMissing());
         assertTrue(jwt.getClaim("display_username").isMissing());
+        assertTrue(jwt.getClaim("max_age").isMissing());
+        assertTrue(jwt.getClaim("prompt").isMissing());
     }
 
     @Test

@@ -68,10 +68,19 @@ public class Utils {
     addClaimIfPresent(jwt, "dest_app_name", options.getDestAppName());
     addClaimIfPresent(jwt, "dest_app_id", options.getDestAppId());
     addClaimIfPresent(jwt, "display_username", options.getDisplayUsername());
+    addClaimIfPresent(jwt, "max_age", options.getMaxAge());
+    addClaimIfPresent(jwt, "prompt", options.getPrompt());
     return jwt.sign(Algorithm.HMAC512(clientSecret));
   }
 
   private static void addClaimIfPresent(Builder jwt, String name, String value) {
+    if (value != null) {
+      jwt.withClaim(name, value);
+    }
+  }
+
+  private static void addClaimIfPresent(Builder jwt, String name, Integer value) {
+    // Only null counts as unset here; zero is a value Duo acts on.
     if (value != null) {
       jwt.withClaim(name, value);
     }

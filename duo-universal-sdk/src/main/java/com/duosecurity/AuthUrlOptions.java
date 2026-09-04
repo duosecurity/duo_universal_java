@@ -8,12 +8,19 @@ package com.duosecurity;
  */
 public class AuthUrlOptions {
 
+  /**
+   * The only value Duo currently accepts for {@link Builder#setPrompt(String)}.
+   */
+  public static final String PROMPT_LOGIN = "login";
+
   private final String username;
   private final String state;
   private final String nonce;
   private final String destAppName;
   private final String destAppId;
   private final String displayUsername;
+  private final Integer maxAge;
+  private final String prompt;
 
   private AuthUrlOptions(Builder builder) {
     this.username = builder.username;
@@ -22,6 +29,8 @@ public class AuthUrlOptions {
     this.destAppName = builder.destAppName;
     this.destAppId = builder.destAppId;
     this.displayUsername = builder.displayUsername;
+    this.maxAge = builder.maxAge;
+    this.prompt = builder.prompt;
   }
 
   public String getUsername() {
@@ -48,6 +57,14 @@ public class AuthUrlOptions {
     return displayUsername;
   }
 
+  public Integer getMaxAge() {
+    return maxAge;
+  }
+
+  public String getPrompt() {
+    return prompt;
+  }
+
   /**
    * Builds an {@link AuthUrlOptions}.
    */
@@ -58,6 +75,8 @@ public class AuthUrlOptions {
     private String destAppName;
     private String destAppId;
     private String displayUsername;
+    private Integer maxAge;
+    private String prompt;
 
     /**
      * Builder.
@@ -124,6 +143,35 @@ public class AuthUrlOptions {
      */
     public Builder setDisplayUsername(String displayUsername) {
       this.displayUsername = displayUsername;
+      return this;
+    }
+
+    /**
+     * Optionally limit how long ago the user's last interactive Duo authentication may have been.
+     * Duo forces the user to authenticate interactively again when a remembered session is older
+     * than this, and a value of {@code 0} always forces it.
+     *
+     * @param maxAge The number of seconds since the user last authenticated interactively
+     *
+     * @return the Builder
+     */
+    public Builder setMaxAge(Integer maxAge) {
+      this.maxAge = maxAge;
+      return this;
+    }
+
+    /**
+     * Optionally set the OIDC {@code prompt} value. Pass {@link AuthUrlOptions#PROMPT_LOGIN} to
+     * force the user to authenticate interactively even when a remembered session exists, which
+     * is equivalent to {@link #setMaxAge(Integer)} with {@code 0}. Duo does not currently accept
+     * any other value.
+     *
+     * @param prompt The prompt value to send
+     *
+     * @return the Builder
+     */
+    public Builder setPrompt(String prompt) {
+      this.prompt = prompt;
       return this;
     }
 
