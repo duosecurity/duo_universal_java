@@ -3,6 +3,7 @@ package com.duosecurity;
 import static java.lang.String.format;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator.Builder;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.Claim;
@@ -46,11 +47,11 @@ public class Utils {
   }
 
   static String createJwtForAuthUrl(String clientId, String clientSecret, String redirectUri,
-                                    String state, String username,
-                                    Boolean useDuoCodeAttribute, String apiHost) {
+                                    Boolean useDuoCodeAttribute, String apiHost,
+                                    AuthUrlOptions options) {
     Date expiration = new Date();
     expiration.setTime(expiration.getTime() + FIVE_MINUTES_IN_MILLISECONDS);
-    return JWT.create()
+    Builder jwt = JWT.create()
               .withHeader(HEADERS)
               .withExpiresAt(expiration)
               .withIssuer(clientId)
@@ -58,11 +59,37 @@ public class Utils {
               .withClaim("scope", "openid")
               .withClaim("client_id", clientId)
               .withClaim("redirect_uri", redirectUri)
-              .withClaim("state", state)
-              .withClaim("duo_uname", username)
+              .withClaim("state", options.getState())
+              .withClaim("duo_uname", options.getUsername())
               .withClaim("response_type", "code")
-              .withClaim("use_duo_code_attribute", useDuoCodeAttribute)
-              .sign(Algorithm.HMAC512(clientSecret));
+              .withClaim("use_duo_code_attribute", useDuoCodeAttribute);
+    // The remaining claims are optional, and Duo treats an absent claim differently from an
+    // empty one, so only add them when the caller supplied a value.
+    addClaimIfPresent(jwt, "dest_app_name", options.getDestAppName());
+    addClaimIfPresent(jwt, "dest_app_id", options.getDestAppId());
+    addClaimIfPresent(jwt, "display_username", options.getDisplayUsername());
+    addClaimIfPresent(jwt, "max_age", options.getMaxAge());
+    addClaimIfPresent(jwt, "prompt", options.getPrompt());
+    return jwt.sign(Algorithm.HMAC512(clientSecret));
+  }
+
+  private static void addClaimIfPresent(Builder jwt, String name, String value) {
+    if (value != null) {
+      jwt.withClaim(name, value);
+    }
+  }
+
+  private static void addClaimIfPresent(Builder jwt, String name, Integer value) {
+    // Only null counts as unset here; zero is a value Duo acts on.
+    if (value != null) {
+      jwt.withClaim(name, value);
+    }
+  }
+
+  private static void addClaimIfPresent(Builder jwt, String name, AuthUrlOptions.Prompt value) {
+    if (value != null) {
+      jwt.withClaim(name, value.getValue());
+    }
   }
 
   static Token transformDecodedJwtToToken(DecodedJWT decodedJwt) {
@@ -209,6 +236,9 @@ public class Utils {
       application.setName(applicationMap.containsKey("name")
                           && applicationMap.get("name") != null
                           ? applicationMap.get("name").toString() : null);
+      application.setDestination_name(applicationMap.containsKey("destination_name")
+                          && applicationMap.get("destination_name") != null
+                          ? applicationMap.get("destination_name").toString() : null);
     }
     return application;
   }

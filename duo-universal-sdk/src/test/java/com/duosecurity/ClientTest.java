@@ -153,6 +153,98 @@ class ClientTest {
     }
 
     @Test
+    void createAuthUrl_with_options_sends_username_and_state() throws DuoException {
+        String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE).build());
+
+        DecodedJWT jwt = decodeRequestJwt(urlString);
+        assertEquals(USERNAME, jwt.getClaim("duo_uname").asString());
+        assertEquals(STATE, jwt.getClaim("state").asString());
+    }
+
+    @Test
+    void createAuthUrl_sends_dest_app_name() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setDestAppName("Acme VPN").build());
+
+        assertEquals("Acme VPN", decodeRequestJwt(urlString).getClaim("dest_app_name").asString());
+    }
+
+    @Test
+    void createAuthUrl_sends_dest_app_id() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setDestAppId("vpn-prod-1").build());
+
+        assertEquals("vpn-prod-1", decodeRequestJwt(urlString).getClaim("dest_app_id").asString());
+    }
+
+    @Test
+    void createAuthUrl_sends_display_username() throws DuoException {
+        String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE)
+                .setDisplayUsername("a.smith@acme.com").build());
+
+        DecodedJWT jwt = decodeRequestJwt(urlString);
+        assertEquals("a.smith@acme.com", jwt.getClaim("display_username").asString());
+        // display_username only changes what Duo shows the user; the username Duo authenticates
+        // and later returns as preferred_username must be unaffected.
+        assertEquals(USERNAME, jwt.getClaim("duo_uname").asString());
+    }
+
+    @Test
+    void createAuthUrl_sends_max_age() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setMaxAge(300).build());
+
+        assertEquals(300, decodeRequestJwt(urlString).getClaim("max_age").asInt());
+    }
+
+    @Test
+    void createAuthUrl_sends_max_age_of_zero() throws DuoException {
+        String urlString = client.createAuthUrl(
+                new AuthUrlOptions.Builder(USERNAME, STATE).setMaxAge(0).build());
+
+        // Zero is a meaningful value to Duo -- it forces interactive reauthentication -- so it
+        // must be sent rather than treated as "unset".
+        assertEquals(0, decodeRequestJwt(urlString).getClaim("max_age").asInt());
+    }
+
+    @Test
+    void createAuthUrl_sends_prompt() throws DuoException {
+        String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE)
+                .setPrompt(AuthUrlOptions.Prompt.LOGIN).build());
+
+        // Duo expects the wire value, not the enum constant name.
+        assertEquals("login", decodeRequestJwt(urlString).getClaim("prompt").asString());
+    }
+
+    @Test
+    void createAuthUrl_omits_optional_claims_that_were_not_set() throws DuoException {
+        String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE).build());
+
+        DecodedJWT jwt = decodeRequestJwt(urlString);
+        // Duo treats an absent claim differently from one present with a null value, so an
+        // unset option must leave the claim out of the JWT entirely.
+        assertTrue(jwt.getClaim("dest_app_name").isMissing());
+        assertTrue(jwt.getClaim("dest_app_id").isMissing());
+        assertTrue(jwt.getClaim("display_username").isMissing());
+        assertTrue(jwt.getClaim("max_age").isMissing());
+        assertTrue(jwt.getClaim("prompt").isMissing());
+    }
+
+    @Test
+    void createAuthUrl_throws_exception_for_null_options() {
+        try {
+            client.createAuthUrl((AuthUrlOptions) null);
+            Assertions.fail();
+        } catch (DuoException e) {
+            assertEquals("Missing options", e.getMessage());
+        }
+    }
+
+    private static DecodedJWT decodeRequestJwt(String urlString) {
+        return JWT.decode(HttpUrl.parse(urlString).queryParameter("request"));
+    }
+
+    @Test
     void createAuthUrl_throws_exception_for_invalid_username() {
         try {
             client.createAuthUrl("", STATE);
