@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
-import okhttp3.CertificatePinner;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -40,12 +41,14 @@ public class DuoConnector {
    * DuoConnector Constructor.
    *
    * @param apiHost This value is the api host provided by Duo in the admin panel.
-   * @param caCerts CA Certificates used to connect to Duo
+   * @param sslSocketFactory Custom SSLSocketFactory, or null for system defaults
+   * @param trustManager Custom X509TrustManager, or null for system defaults
    *
    * @throws DuoException For issues getting and validating the URL
    */
-  public DuoConnector(String apiHost, String[] caCerts) throws DuoException {
-    this(apiHost, null, null, caCerts);
+  public DuoConnector(String apiHost, SSLSocketFactory sslSocketFactory,
+                      X509TrustManager trustManager) throws DuoException {
+    this(apiHost, null, null, sslSocketFactory, trustManager);
   }
 
   /**
@@ -54,35 +57,30 @@ public class DuoConnector {
    * @param apiHost This value is the api host provided by Duo in the admin panel.
    * @param proxyHost This value is the proxy server hostname
    * @param proxyPort This value is the proxy server port
-   * @param caCerts CA Certificates used to connect to Duo, or null to disable pinning
+   * @param sslSocketFactory Custom SSLSocketFactory, or null for system defaults
+   * @param trustManager Custom X509TrustManager, or null for system defaults
    *
    * @throws DuoException For issues getting and validating the URL
    */
-  public DuoConnector(String apiHost, String proxyHost, Integer proxyPort, String[] caCerts)
+  public DuoConnector(String apiHost, String proxyHost, Integer proxyPort,
+                      SSLSocketFactory sslSocketFactory, X509TrustManager trustManager)
           throws DuoException {
-    CertificatePinner certificatePinner;
-    if (caCerts != null) {
-      certificatePinner = new CertificatePinner.Builder()
-              .add(apiHost, caCerts).build();
-    } else {
-      certificatePinner = CertificatePinner.DEFAULT;
-    }
     ConnectionPool connectionPool = new ConnectionPool(
             MAX_IDLE_CONNECTIONS, CONNECTION_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS);
-    OkHttpClient client;
+
+    OkHttpClient.Builder builder = new OkHttpClient.Builder()
+            .connectionPool(connectionPool);
+
+    if (sslSocketFactory != null && trustManager != null) {
+      builder.sslSocketFactory(sslSocketFactory, trustManager);
+    }
+
     if (proxyHost != null && proxyPort != null) {
       Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-      client = new OkHttpClient.Builder()
-              .certificatePinner(certificatePinner)
-              .connectionPool(connectionPool)
-              .proxy(proxy)
-              .build();
-    } else {
-      client = new OkHttpClient.Builder()
-              .certificatePinner(certificatePinner)
-              .connectionPool(connectionPool)
-              .build();
+      builder.proxy(proxy);
     }
+
+    OkHttpClient client = builder.build();
 
     retrofit = new Retrofit.Builder()
             .baseUrl(getAndValidateUrl(apiHost, "").toString())
