@@ -210,8 +210,9 @@ class ClientTest {
     @Test
     void createAuthUrl_sends_prompt() throws DuoException {
         String urlString = client.createAuthUrl(new AuthUrlOptions.Builder(USERNAME, STATE)
-                .setPrompt(AuthUrlOptions.PROMPT_LOGIN).build());
+                .setPrompt(AuthUrlOptions.Prompt.LOGIN).build());
 
+        // Duo expects the wire value, not the enum constant name.
         assertEquals("login", decodeRequestJwt(urlString).getClaim("prompt").asString());
     }
 

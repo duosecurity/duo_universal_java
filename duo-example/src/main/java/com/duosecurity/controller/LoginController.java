@@ -139,7 +139,7 @@ public class LoginController {
                     // Reauthenticate interactively if the remembered session is older than this
                     .setMaxAge(3600)
                     // Or force interactive reauthentication regardless of remembered session
-                    .setPrompt(AuthUrlOptions.PROMPT_LOGIN)
+                    .setPrompt(AuthUrlOptions.Prompt.LOGIN)
                     .build());
     */
     ModelAndView model = new ModelAndView("/redirect");

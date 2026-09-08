@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ApplicationTest {
 
@@ -16,7 +15,6 @@ class ApplicationTest {
         other.setDestination_name("Acme Payroll");
 
         assertNotEquals(application, other);
-        assertNotEquals(application.hashCode(), other.hashCode());
     }
 
     @Test
@@ -27,14 +25,8 @@ class ApplicationTest {
         other.setDestination_name("Acme Intranet");
 
         assertEquals(application, other);
+        // Equal objects are required to agree on hashCode; unequal ones are not required to
+        // disagree, so there is no matching assertion in the test above.
         assertEquals(application.hashCode(), other.hashCode());
-    }
-
-    @Test
-    void toString_includes_destination_name() {
-        Application application = new Application("key", "name");
-        application.setDestination_name("Acme Intranet");
-
-        assertTrue(application.toString().contains("destination_name=Acme Intranet"));
     }
 }

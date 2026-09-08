@@ -86,6 +86,12 @@ public class Utils {
     }
   }
 
+  private static void addClaimIfPresent(Builder jwt, String name, AuthUrlOptions.Prompt value) {
+    if (value != null) {
+      jwt.withClaim(name, value.getValue());
+    }
+  }
+
   static Token transformDecodedJwtToToken(DecodedJWT decodedJwt) {
     Token token = new Token();
     token.setIat(decodedJwt.getClaim("iat").asDouble());

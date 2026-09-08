@@ -9,9 +9,29 @@ package com.duosecurity;
 public class AuthUrlOptions {
 
   /**
-   * The only value Duo currently accepts for {@link Builder#setPrompt(String)}.
+   * The values Duo accepts for {@link Builder#setPrompt(Prompt)}.
    */
-  public static final String PROMPT_LOGIN = "login";
+  public enum Prompt {
+    /**
+     * Force the user to authenticate interactively even when a remembered session exists.
+     */
+    LOGIN("login");
+
+    private final String value;
+
+    Prompt(String value) {
+      this.value = value;
+    }
+
+    /**
+     * The value Duo expects on the wire, which is not the name of the constant.
+     *
+     * @return the prompt value sent to Duo
+     */
+    public String getValue() {
+      return value;
+    }
+  }
 
   private final String username;
   private final String state;
@@ -20,7 +40,7 @@ public class AuthUrlOptions {
   private final String destAppId;
   private final String displayUsername;
   private final Integer maxAge;
-  private final String prompt;
+  private final Prompt prompt;
 
   private AuthUrlOptions(Builder builder) {
     this.username = builder.username;
@@ -61,7 +81,7 @@ public class AuthUrlOptions {
     return maxAge;
   }
 
-  public String getPrompt() {
+  public Prompt getPrompt() {
     return prompt;
   }
 
@@ -76,7 +96,7 @@ public class AuthUrlOptions {
     private String destAppId;
     private String displayUsername;
     private Integer maxAge;
-    private String prompt;
+    private Prompt prompt;
 
     /**
      * Builder.
@@ -161,16 +181,15 @@ public class AuthUrlOptions {
     }
 
     /**
-     * Optionally set the OIDC {@code prompt} value. Pass {@link AuthUrlOptions#PROMPT_LOGIN} to
-     * force the user to authenticate interactively even when a remembered session exists, which
-     * is equivalent to {@link #setMaxAge(Integer)} with {@code 0}. Duo does not currently accept
-     * any other value.
+     * Optionally set the OIDC {@code prompt} value. {@link Prompt#LOGIN} forces the user to
+     * authenticate interactively even when a remembered session exists, which is equivalent to
+     * {@link #setMaxAge(Integer)} with {@code 0}. It is the only value Duo currently accepts.
      *
      * @param prompt The prompt value to send
      *
      * @return the Builder
      */
-    public Builder setPrompt(String prompt) {
+    public Builder setPrompt(Prompt prompt) {
       this.prompt = prompt;
       return this;
     }
