@@ -8,8 +8,8 @@ on:
       - main
 
 jobs:
-   build-and-test:
-     name: Java CI - test
+   sdk-build-and-test:
+     name: SDK - Java ${{ matrix.java-version }}
      runs-on: ubuntu-latest
 
      strategy:
@@ -25,19 +25,56 @@ jobs:
            distribution: 'temurin'
            java-version: ${{ matrix.java-version }}
 
+       - name: Build and test SDK
+         run: mvn -B install -pl duo-universal-sdk
+
+       - name: Lint SDK with checkstyle
+         run: mvn checkstyle:check -pl duo-universal-sdk
+
+       - name: Verify release profile works
+         run: mvn -P release package -pl duo-universal-sdk
+
+   example-build-and-test:
+     name: Example App - Java ${{ matrix.java-version }}
+     runs-on: ubuntu-latest
+     needs: sdk-build-and-test
+
+     strategy:
+       matrix:
+        java-version: [17, 21]
+
+     steps:
+       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+       - name: Set up Java
+         uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+         with:
+           distribution: 'temurin'
+           java-version: ${{ matrix.java-version }}
+
        - name: Inject dummy example config
          working-directory: duo-example
          run: printf "duo.clientId=DIAAAAAAAAAAAAAAAAAA\nduo.clientSecret=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nduo.api.host=example.duosecurity.com\nduo.redirect.uri=http://localhost:8080\nduo.failmode=CLOSED\n" > ./src/main/resources/application.properties
-       
-       - name: Build and test with Maven
-         run: mvn -B install
-       
-       - name: Lint with checkstyle
-         run: mvn checkstyle:check
-       
+
+       - name: Build example app with dependencies
+         run: mvn -B install -pl duo-example -am
+
+       - name: Lint example with checkstyle
+         run: mvn checkstyle:check -pl duo-example
+
        - name: Verify example starts
          working-directory: duo-example
          run: mvn spring-boot:start
-       
-       - name: Verify release profile works
-         run: mvn -P release package
+
+   ci-pass:
+     name: CI Pass
+     runs-on: ubuntu-latest
+     if: always()
+     needs: [sdk-build-and-test, example-build-and-test]
+     steps:
+       - name: Check job results
+         run: |
+           if [[ "${{ needs.sdk-build-and-test.result }}" != "success" || "${{ needs.example-build-and-test.result }}" != "success" ]]; then
+             echo "One or more jobs failed"
+             exit 1
+           fi
