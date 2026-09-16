@@ -26,10 +26,10 @@ The Duo Universal Client for Java is available from Duo Security on Maven.  Incl
 <dependency>
     <groupId>com.duosecurity</groupId>
     <artifactId>duo-universal-sdk</artifactId>
-    <version>1.3.2</version>
+    <version>1.4.0</version>
 </dependency>
 ```
-See https://central.sonatype.com/artifact/com.duosecurity/duo-universal-sdk/1.3.2 for more details.
+See https://central.sonatype.com/artifact/com.duosecurity/duo-universal-sdk/1.4.0 for more details.
 
 ## TLS 1.2 and 1.3 Support
 
@@ -43,11 +43,11 @@ The public keys are in [`KEYS`](KEYS) in this repository.
 ```
 curl -O https://raw.githubusercontent.com/duosecurity/duo_universal_java/main/KEYS
 gpg --import KEYS
-gpg --verify duo-universal-sdk-1.3.2.jar.asc duo-universal-sdk-1.3.2.jar
+gpg --verify duo-universal-sdk-1.4.0.jar.asc duo-universal-sdk-1.4.0.jar
 ```
 
 The `.jar.asc` signature files are available alongside each artifact on Maven Central,
-for example <https://repo1.maven.org/maven2/com/duosecurity/duo-universal-sdk/1.3.2/>.
+for example <https://repo1.maven.org/maven2/com/duosecurity/duo-universal-sdk/1.4.0/>.
 
 | Versions | Key fingerprint |
 | --- | --- |
