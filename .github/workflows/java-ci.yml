@@ -14,7 +14,13 @@ jobs:
 
      strategy:
        matrix:
-        java-version: [8, 11, 17, 21]
+        include:
+          - { java-version: 8, distribution: temurin }
+          - { java-version: 11, distribution: temurin }
+          - { java-version: 17, distribution: temurin }
+          - { java-version: 21, distribution: temurin }
+          # Adoptium has not published Temurin 27 yet, so the 27 legs use Zulu
+          - { java-version: 27, distribution: zulu }
 
      steps:
        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -22,7 +28,7 @@ jobs:
        - name: Set up Java
          uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
          with:
-           distribution: 'temurin'
+           distribution: ${{ matrix.distribution }}
            java-version: ${{ matrix.java-version }}
 
        - name: Build and test SDK
@@ -41,7 +47,10 @@ jobs:
 
      strategy:
        matrix:
-        java-version: [17, 21]
+        include:
+          - { java-version: 17, distribution: temurin }
+          - { java-version: 21, distribution: temurin }
+          - { java-version: 27, distribution: zulu }
 
      steps:
        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,7 +58,7 @@ jobs:
        - name: Set up Java
          uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
          with:
-           distribution: 'temurin'
+           distribution: ${{ matrix.distribution }}
            java-version: ${{ matrix.java-version }}
 
        - name: Inject dummy example config
